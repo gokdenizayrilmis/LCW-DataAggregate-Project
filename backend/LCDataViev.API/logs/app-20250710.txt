@@ -1,0 +1,1 @@
+2025-07-10 23:01:38.472 +03:00 [ERR] An error occurred using the connection to database 'LCDataViewDB' on server 'tcp://localhost:5432'.
