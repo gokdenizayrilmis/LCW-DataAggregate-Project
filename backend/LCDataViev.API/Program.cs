@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using LCDataViev.API.Data;
+using LCDataViev.API.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,10 @@ builder.Services.AddSwaggerGen();
 // Entity Framework Configuration
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Repository Pattern Configuration
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<IStoreRepository, StoreRepository>();
 
 // CORS Configuration
 builder.Services.AddCors(options =>

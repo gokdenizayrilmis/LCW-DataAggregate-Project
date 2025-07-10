@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("LCDataViev.API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9aa3ce8f56d42b74e61af2949077331e0263b653")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+068ae995559899461f3df0f5660949dd8f84861e")]
 [assembly: System.Reflection.AssemblyProductAttribute("LCDataViev.API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("LCDataViev.API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
