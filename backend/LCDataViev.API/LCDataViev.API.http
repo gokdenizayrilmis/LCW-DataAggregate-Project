@@ -1,0 +1,6 @@
+@LCDataViev.API_HostAddress = http://localhost:5283
+
+GET {{LCDataViev.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
