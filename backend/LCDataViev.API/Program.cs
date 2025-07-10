@@ -15,6 +15,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Repository Pattern Configuration
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<IStoreRepository, StoreRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ISaleRepository, SaleRepository>();
+builder.Services.AddScoped<IReturnRepository, ReturnRepository>();
+builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
 
 // CORS Configuration
 builder.Services.AddCors(options =>

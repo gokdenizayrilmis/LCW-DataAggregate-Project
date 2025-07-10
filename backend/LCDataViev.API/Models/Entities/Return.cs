@@ -29,6 +29,9 @@ namespace LCDataViev.API.Models.Entities
         
         public DateTime ReturnDate { get; set; } = DateTime.UtcNow;
         
+        public decimal Amount { get; set; }
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        
         [ForeignKey("CreatedByUser")]
         public int? CreatedBy { get; set; }
         
@@ -38,5 +41,9 @@ namespace LCDataViev.API.Models.Entities
         public virtual Store Store { get; set; } = null!;
         public virtual Sale? Sale { get; set; }
         public virtual User? CreatedByUser { get; set; }
+        [Required]
+        [ForeignKey("User")]
+        public int UserId { get; set; }
+        public virtual User User { get; set; } = null!;
     }
 }

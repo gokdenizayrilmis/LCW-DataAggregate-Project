@@ -16,6 +16,13 @@ namespace LCDataViev.API.Models.Entities
         
         [Required]
         [StringLength(100)]
+        public string Name { get; set; } = string.Empty;
+        [Required]
+        [StringLength(100)]
+        public string Surname { get; set; } = string.Empty;
+        
+        [Required]
+        [StringLength(100)]
         [EmailAddress]
         public string Email { get; set; } = string.Empty;
         
@@ -26,7 +33,7 @@ namespace LCDataViev.API.Models.Entities
         public UserRole Role { get; set; } = UserRole.User;
         
         [ForeignKey("Store")]
-        public int? StoreId { get; set; }
+        public int StoreId { get; set; }
         
         public bool IsActive { get; set; } = true;
         

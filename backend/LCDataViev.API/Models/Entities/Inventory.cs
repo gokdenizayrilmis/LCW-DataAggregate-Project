@@ -31,6 +31,9 @@ namespace LCDataViev.API.Models.Entities
         
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         
+        public int Quantity { get; set; }
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        
         // Navigation Properties
         public virtual Store Store { get; set; } = null!;
     }
