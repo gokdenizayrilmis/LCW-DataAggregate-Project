@@ -1,11 +1,11 @@
 cat > README.md << 'EOF'
 # LCW Data Aggregate Project
 
-## �� Proje Açıklaması
+❓❓ Proje Açıklaması
 
 Client-Side Data Aggregate sistemi - Mağazalardan veri toplayan, işleyen ve görselleştiren kapsamlı bir sistem.
 
-## ��️ Teknoloji Stack'i
+⭐⭐ Teknoloji Stack'i
 
 ### Backend
 - **.NET 9** - Web API
@@ -27,7 +27,7 @@ Client-Side Data Aggregate sistemi - Mağazalardan veri toplayan, işleyen ve g�
 - **Elasticsearch** - Log Analytics (Opsiyonel)
 - **Kibana** - Monitoring (Opsiyonel)
 
-## 🚀 Kurulum
+🚀🚀 Kurulum
 
 ### Gereksinimler
 - .NET 9 SDK
@@ -50,7 +50,7 @@ npm install
 npm start
 ```
 
-## �� API Endpoints
+👀👀 API Endpoints
 
 ### V1 Özellikleri
 - `/api/satis` - Satış işlemleri
@@ -58,14 +58,14 @@ npm start
 - `/api/stok` - Stok işlemleri
 - `/api/dashboard` - Dashboard verileri
 
-## 📈 Dashboard Özellikleri
+ 📈📈 Dashboard Özellikleri
 
 - **V1:** Aktif Mağaza Sayısı
 - **V2:** Anlık Toplam Stok, İade, Satış
 - **V3:** Mağaza bazlı veriler
 - **V4:** Son 1 haftalık kümülatif toplamlar
 
-## �� Katkıda Bulunma
+👊👊 Katkıda Bulunma
 
 1. Fork yapın
 2. Feature branch oluşturun (`git checkout -b feature/amazing-feature`)
@@ -73,11 +73,10 @@ npm start
 4. Push yapın (`git push origin feature/amazing-feature`)
 5. Pull Request oluşturun
 
-## 📄 Lisans
+📄📄 Lisans
 
 Bu proje MIT lisansı altında lisanslanmıştır.
 
-## �� Geliştirici
+🎉🎉 Geliştirici
 
-- **Ayrıl Gökdeniz** - *İlk Geliştirici*
-EOF
+Gökdeniz Ayrılmış
