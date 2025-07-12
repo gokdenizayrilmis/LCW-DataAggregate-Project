@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations;
 namespace LCDataViev.API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/stores")]
     public class StoreController : ControllerBase
     {
         private readonly IStoreRepository _storeRepository;
@@ -19,7 +19,7 @@ namespace LCDataViev.API.Controllers
             _logger = logger;
         }
 
-        // GET: api/store
+        // GET: api/stores
         [HttpGet]
         public async Task<ActionResult<IEnumerable<StoreListResponseDto>>> GetStores()
         {
@@ -46,7 +46,7 @@ namespace LCDataViev.API.Controllers
             }
         }
 
-        // GET: api/store/active
+        // GET: api/stores/active
         [HttpGet("active")]
         public async Task<ActionResult<IEnumerable<StoreListResponseDto>>> GetActiveStores()
         {
@@ -73,7 +73,7 @@ namespace LCDataViev.API.Controllers
             }
         }
 
-        // GET: api/store/search?name={name}
+        // GET: api/stores/search?name={name}
         [HttpGet("search")]
         public async Task<ActionResult<IEnumerable<StoreListResponseDto>>> SearchStores([FromQuery] string name)
         {
@@ -105,7 +105,7 @@ namespace LCDataViev.API.Controllers
             }
         }
 
-        // GET: api/store/{id}
+        // GET: api/stores/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<StoreResponseDto>> GetStore(int id)
         {
@@ -142,7 +142,7 @@ namespace LCDataViev.API.Controllers
             }
         }
 
-        // POST: api/store
+        // POST: api/stores
         [HttpPost]
         public async Task<ActionResult<StoreResponseDto>> CreateStore(CreateStoreDto createStoreDto)
         {
@@ -191,7 +191,7 @@ namespace LCDataViev.API.Controllers
             }
         }
 
-        // PUT: api/store/{id}
+        // PUT: api/stores/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateStore(int id, UpdateStoreDto updateStoreDto)
         {
@@ -226,7 +226,7 @@ namespace LCDataViev.API.Controllers
             }
         }
 
-        // DELETE: api/store/{id}
+        // DELETE: api/stores/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteStore(int id)
         {
@@ -249,7 +249,7 @@ namespace LCDataViev.API.Controllers
             }
         }
 
-        // GET: api/store/count/active
+        // GET: api/stores/count/active
         [HttpGet("count/active")]
         public async Task<ActionResult<int>> GetActiveStoreCount()
         {
@@ -265,7 +265,7 @@ namespace LCDataViev.API.Controllers
             }
         }
 
-        // GET: api/store/count/inactive
+        // GET: api/stores/count/inactive
         [HttpGet("count/inactive")]
         public async Task<ActionResult<int>> GetInactiveStoreCount()
         {
