@@ -2,7 +2,12 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, Container, Box } from '@mui/material';
-import StorePage from './pages/StorePage';
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import HomePage from './pages/HomePage';
+import DashboardPage from './pages/DashboardPage';
+import AdminPage from './pages/AdminPage';
+import lcwLogo from './assets/lcw-logo.png';
 
 const theme = createTheme({
   palette: {
@@ -17,7 +22,7 @@ const theme = createTheme({
       dark: '#c60055',
     },
     background: {
-      default: '#f0f2f5',
+      default: '#f8fafc',
       paper: '#ffffff',
     },
     success: {
@@ -121,28 +126,37 @@ function App() {
       <Router>
         <Box sx={{ 
           minHeight: '100vh',
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
-          backgroundSize: '400% 400%',
-          animation: 'gradient 15s ease infinite',
-          py: 2,
-          '@keyframes gradient': {
-            '0%': {
-              backgroundPosition: '0% 50%',
-            },
-            '50%': {
-              backgroundPosition: '100% 50%',
-            },
-            '100%': {
-              backgroundPosition: '0% 50%',
-            },
-          },
+          display: 'flex',
+          flexDirection: 'column',
+          background: 'linear-gradient(135deg, #f8fafc 0%, #e3f2fd 50%, #f3e5f5 100%)',
         }}>
-          <Container maxWidth="lg" sx={{ py: 2 }}>
-            <Routes>
-              <Route path="/" element={<StorePage />} />
-              <Route path="/stores" element={<StorePage />} />
-            </Routes>
-          </Container>
+          {/* Ana Sayfa için özel layout */}
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            
+            {/* Diğer sayfalar için navbar ve footer ile */}
+            <Route path="/dashboard" element={
+              <>
+                <Navbar />
+                <Container maxWidth="lg" sx={{ py: 2, flex: 1 }}>
+                  <DashboardPage />
+                </Container>
+                <Footer />
+              </>
+            } />
+            
+
+            
+            <Route path="/admin" element={
+              <>
+                <Navbar />
+                <Container maxWidth="lg" sx={{ py: 2, flex: 1 }}>
+                  <AdminPage />
+                </Container>
+                <Footer />
+              </>
+            } />
+          </Routes>
         </Box>
       </Router>
     </ThemeProvider>
