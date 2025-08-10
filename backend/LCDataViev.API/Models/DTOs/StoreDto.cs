@@ -20,6 +20,10 @@ namespace LCDataViev.API.Models.DTOs
         public string? Email { get; set; }
         
         public bool IsActive { get; set; } = true;
+        public bool IsDomestic { get; set; } = true; // true: Yurt içi, false: Yurt dışı
+        [Required]
+        [StringLength(100, MinimumLength = 4)]
+        public string Password { get; set; } = string.Empty;
     }
 
     // Update DTO
@@ -40,6 +44,9 @@ namespace LCDataViev.API.Models.DTOs
         public string? Email { get; set; }
         
         public bool IsActive { get; set; }
+        public bool IsDomestic { get; set; } = true; // true: Yurt içi, false: Yurt dışı
+        [StringLength(100)]
+        public string? Password { get; set; } // opsiyonel - boş olabilir
     }
 
     // Response DTO
@@ -51,6 +58,7 @@ namespace LCDataViev.API.Models.DTOs
         public string? Phone { get; set; }
         public string? Email { get; set; }
         public bool IsActive { get; set; }
+        public bool IsDomestic { get; set; } = true; // true: Yurt içi, false: Yurt dışı
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public int UserCount { get; set; }
@@ -68,6 +76,7 @@ namespace LCDataViev.API.Models.DTOs
         public string? Phone { get; set; }
         public string? Email { get; set; }
         public bool IsActive { get; set; }
+        public bool IsDomestic { get; set; } = true; // true: Yurt içi, false: Yurt dışı
         public DateTime CreatedAt { get; set; }
     }
 } 

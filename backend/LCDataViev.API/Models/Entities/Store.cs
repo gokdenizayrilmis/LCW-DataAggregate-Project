@@ -25,6 +25,8 @@ namespace LCDataViev.API.Models.Entities
         
         public bool IsActive { get; set; } = true;
         
+        public bool IsDomestic { get; set; } = true; // true: Yurt içi, false: Yurt dışı
+        
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
@@ -34,5 +36,8 @@ namespace LCDataViev.API.Models.Entities
         public virtual ICollection<Sale> Sales { get; set; } = new List<Sale>();
         public virtual ICollection<Return> Returns { get; set; } = new List<Return>();
         public virtual ICollection<Inventory> Inventories { get; set; } = new List<Inventory>();
+        public virtual ICollection<Employee> Employees { get; set; } = new List<Employee>();
+        public virtual ICollection<Product> Products { get; set; } = new List<Product>();
+        public virtual ICollection<WeeklySale> WeeklySales { get; set; } = new List<WeeklySale>();
     }
 }

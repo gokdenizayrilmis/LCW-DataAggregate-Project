@@ -2,11 +2,10 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, Container, Box } from '@mui/material';
-import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
 import DashboardPage from './pages/DashboardPage';
-import AdminPage from './pages/AdminPage';
+import StoreDetailPage from './pages/StoreDetailPage';
 import lcwLogo from './assets/lcw-logo.png';
 
 const theme = createTheme({
@@ -130,32 +129,18 @@ function App() {
           flexDirection: 'column',
           background: 'linear-gradient(135deg, #f8fafc 0%, #e3f2fd 50%, #f3e5f5 100%)',
         }}>
-          {/* Ana Sayfa için özel layout */}
           <Routes>
             <Route path="/" element={<HomePage />} />
             
-            {/* Diğer sayfalar için navbar ve footer ile */}
+            {/* Dashboard sayfası */}
             <Route path="/dashboard" element={
-              <>
-                <Navbar />
-                <Container maxWidth="lg" sx={{ py: 2, flex: 1 }}>
-                  <DashboardPage />
-                </Container>
-                <Footer />
-              </>
+              <Container maxWidth="lg" sx={{ py: 2, flex: 1 }}>
+                <DashboardPage />
+              </Container>
             } />
             
-
-            
-            <Route path="/admin" element={
-              <>
-                <Navbar />
-                <Container maxWidth="lg" sx={{ py: 2, flex: 1 }}>
-                  <AdminPage />
-                </Container>
-                <Footer />
-              </>
-            } />
+            {/* Mağaza detay sayfası */}
+            <Route path="/store/:storeId" element={<StoreDetailPage />} />
           </Routes>
         </Box>
       </Router>

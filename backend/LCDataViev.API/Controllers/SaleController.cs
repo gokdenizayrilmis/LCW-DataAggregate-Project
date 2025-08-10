@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using LCDataViev.API.Repositories;
 using LCDataViev.API.Models.Entities;
-using LCDataViev.API.Models.DTOs;
+using LCDataViev.API.Repositories;
 
 namespace LCDataViev.API.Controllers
 {
@@ -10,163 +9,102 @@ namespace LCDataViev.API.Controllers
     public class SaleController : ControllerBase
     {
         private readonly ISaleRepository _saleRepository;
-        private readonly IStoreRepository _storeRepository;
-        private readonly IUserRepository _userRepository;
         private readonly ILogger<SaleController> _logger;
 
-        public SaleController(ISaleRepository saleRepository, IStoreRepository storeRepository, IUserRepository userRepository, ILogger<SaleController> logger)
+        public SaleController(ISaleRepository saleRepository, ILogger<SaleController> logger)
         {
             _saleRepository = saleRepository;
-            _storeRepository = storeRepository;
-            _userRepository = userRepository;
             _logger = logger;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<SaleResponseDto>>> GetSales()
+        public async Task<ActionResult<IEnumerable<Sale>>> GetAll()
         {
-            var sales = await _saleRepository.GetAllAsync();
-            var response = sales.Select(s => new SaleResponseDto
+            try
             {
-                Id = s.Id,
-                StoreId = s.StoreId,
-                StoreName = s.Store?.Name,
-                UserId = s.UserId,
-                UserName = s.User?.Name,
-                Amount = s.Amount,
-                SaleDate = s.SaleDate,
-                CreatedAt = s.CreatedAt,
-                UpdatedAt = s.UpdatedAt
-            });
-            return Ok(response);
-        }
-
-        [HttpGet("store/{storeId}")]
-        public async Task<ActionResult<IEnumerable<SaleResponseDto>>> GetSalesByStore(int storeId)
-        {
-            var sales = await _saleRepository.GetSalesByStoreIdAsync(storeId);
-            var response = sales.Select(s => new SaleResponseDto
+                var sales = await _saleRepository.GetAllAsync();
+                return Ok(sales);
+            }
+            catch (Exception ex)
             {
-                Id = s.Id,
-                StoreId = s.StoreId,
-                StoreName = s.Store?.Name,
-                UserId = s.UserId,
-                UserName = s.User?.Name,
-                Amount = s.Amount,
-                SaleDate = s.SaleDate,
-                CreatedAt = s.CreatedAt,
-                UpdatedAt = s.UpdatedAt
-            });
-            return Ok(response);
-        }
-
-        [HttpGet("user/{userId}")]
-        public async Task<ActionResult<IEnumerable<SaleResponseDto>>> GetSalesByUser(int userId)
-        {
-            var sales = await _saleRepository.GetSalesByUserIdAsync(userId);
-            var response = sales.Select(s => new SaleResponseDto
-            {
-                Id = s.Id,
-                StoreId = s.StoreId,
-                StoreName = s.Store?.Name,
-                UserId = s.UserId,
-                UserName = s.User?.Name,
-                Amount = s.Amount,
-                SaleDate = s.SaleDate,
-                CreatedAt = s.CreatedAt,
-                UpdatedAt = s.UpdatedAt
-            });
-            return Ok(response);
+                _logger.LogError(ex, "Error getting all sales");
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<SaleResponseDto>> GetSale(int id)
+        public async Task<ActionResult<Sale>> GetById(int id)
         {
-            var sale = await _saleRepository.GetSaleWithDetailsAsync(id);
-            if (sale == null)
-                return NotFound();
-            var response = new SaleResponseDto
+            try
             {
-                Id = sale.Id,
-                StoreId = sale.StoreId,
-                StoreName = sale.Store?.Name,
-                UserId = sale.UserId,
-                UserName = sale.User?.Name,
-                Amount = sale.Amount,
-                SaleDate = sale.SaleDate,
-                CreatedAt = sale.CreatedAt,
-                UpdatedAt = sale.UpdatedAt
-            };
-            return Ok(response);
+                var sale = await _saleRepository.GetByIdAsync(id);
+                if (sale == null)
+                {
+                    return NotFound();
+                }
+                return Ok(sale);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting sale with ID: {Id}", id);
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         [HttpPost]
-        public async Task<ActionResult<SaleResponseDto>> CreateSale(CreateSaleDto dto)
+        public async Task<ActionResult<Sale>> Create(Sale sale)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-            var store = await _storeRepository.GetByIdAsync(dto.StoreId);
-            if (store == null)
-                return BadRequest("Store not found");
-            var user = await _userRepository.GetByIdAsync(dto.UserId);
-            if (user == null)
-                return BadRequest("User not found");
-            var sale = new Sale
+            try
             {
-                StoreId = dto.StoreId,
-                UserId = dto.UserId,
-                Amount = dto.Amount,
-                SaleDate = dto.SaleDate,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
-            var created = await _saleRepository.AddAsync(sale);
-            var response = new SaleResponseDto
+                await _saleRepository.AddAsync(sale);
+                return CreatedAtAction(nameof(GetById), new { id = sale.Id }, sale);
+            }
+            catch (Exception ex)
             {
-                Id = created.Id,
-                StoreId = created.StoreId,
-                StoreName = store.Name,
-                UserId = created.UserId,
-                UserName = user.Name,
-                Amount = created.Amount,
-                SaleDate = created.SaleDate,
-                CreatedAt = created.CreatedAt,
-                UpdatedAt = created.UpdatedAt
-            };
-            return CreatedAtAction(nameof(GetSale), new { id = created.Id }, response);
+                _logger.LogError(ex, "Error creating sale");
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateSale(int id, UpdateSaleDto dto)
+        public async Task<IActionResult> Update(int id, Sale sale)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-            var sale = await _saleRepository.GetByIdAsync(id);
-            if (sale == null)
-                return NotFound();
-            var store = await _storeRepository.GetByIdAsync(dto.StoreId);
-            if (store == null)
-                return BadRequest("Store not found");
-            var user = await _userRepository.GetByIdAsync(dto.UserId);
-            if (user == null)
-                return BadRequest("User not found");
-            sale.StoreId = dto.StoreId;
-            sale.UserId = dto.UserId;
-            sale.Amount = dto.Amount;
-            sale.SaleDate = dto.SaleDate;
-            sale.UpdatedAt = DateTime.UtcNow;
-            await _saleRepository.UpdateAsync(sale);
-            return NoContent();
+            if (id != sale.Id)
+            {
+                return BadRequest();
+            }
+
+            try
+            {
+                await _saleRepository.UpdateAsync(sale);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating sale with ID: {Id}", id);
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteSale(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var sale = await _saleRepository.GetByIdAsync(id);
-            if (sale == null)
-                return NotFound();
-            await _saleRepository.DeleteAsync(id);
-            return NoContent();
+            try
+            {
+                var sale = await _saleRepository.GetByIdAsync(id);
+                if (sale == null)
+                {
+                    return NotFound();
+                }
+
+                await _saleRepository.DeleteAsync(sale);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting sale with ID: {Id}", id);
+                return StatusCode(500, "Internal server error");
+            }
         }
     }
-} 
+}

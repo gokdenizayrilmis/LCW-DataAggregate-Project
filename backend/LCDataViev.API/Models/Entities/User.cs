@@ -32,8 +32,7 @@ namespace LCDataViev.API.Models.Entities
         
         public UserRole Role { get; set; } = UserRole.User;
         
-        [ForeignKey("Store")]
-        public int StoreId { get; set; }
+        public int? StoreId { get; set; }
         
         public bool IsActive { get; set; } = true;
         

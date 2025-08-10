@@ -18,8 +18,7 @@ import {
   Email,
   Lock,
   Store as StoreIcon,
-  Inventory2 as InventoryIcon,
-  TrendingUp as TrendingUpIcon
+  Inventory2 as InventoryIcon
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import lcwLogo from '../assets/lcw-logo.png';
@@ -27,6 +26,36 @@ import lcwStore from '../assets/lcw-store.jpg';
 import Footer from '../components/Footer';
 import { Global } from '@emotion/react';
 import CircularProgress from '@mui/material/CircularProgress';
+
+// API response types
+interface Store {
+  id: number;
+  name: string;
+  address: string;
+  phone: string;
+  email: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
+interface Employee {
+  id: number;
+  name: string;
+  surname: string;
+  position: string;
+  storeId: number;
+  isActive: boolean;
+}
+
+interface Product {
+  id: number;
+  name: string;
+  category: string;
+  price: number;
+  stockQuantity: number;
+  storeId: number;
+  isActive: boolean;
+}
 
 
 // Modern ve animasyonlu sayaç componenti
@@ -67,8 +96,9 @@ const Countdown: React.FC = () => {
       </Box>
       <style>{`
         @keyframes pop {
-          0% { transform: scale(0.9); opacity: 0.7; }
-          60% { transform: scale(1.1); opacity: 1; }
+          0% { transform: scale(0.3); opacity: 0; }
+          50% { transform: scale(1.05); }
+          70% { transform: scale(0.9); }
           100% { transform: scale(1); opacity: 1; }
         }
       `}</style>
@@ -76,93 +106,11 @@ const Countdown: React.FC = () => {
   );
 };
 
-// Dairesel progress bar'lı modern sayaç componenti
-const CircularCountdown: React.FC = () => {
-  const target = new Date('2026-12-31T23:59:59');
-  const [now, setNow] = useState(new Date());
-  useEffect(() => {
-    const timer = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-  const diff = target.getTime() - now.getTime();
-  const days = Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
-  const hours = Math.max(0, Math.floor((diff / (1000 * 60 * 60)) % 24));
-  const minutes = Math.max(0, Math.floor((diff / (1000 * 60)) % 60));
-  const seconds = Math.max(0, Math.floor((diff / 1000) % 60));
-  // Yüzde hesapları
-  const dayPercent = Math.min(100, (days / 365) * 100);
-  const hourPercent = Math.min(100, (hours / 24) * 100);
-  const minPercent = Math.min(100, (minutes / 60) * 100);
-  const secPercent = Math.min(100, (seconds / 60) * 100);
-  // Helper
-  const renderCircle = (value: number, label: string, percent: number) => (
-    <Box sx={{ position: 'relative', width: 90, height: 90, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-      <MuiCircularProgress
-        variant="determinate"
-        value={100}
-        size={90}
-        thickness={3.5}
-        sx={{ color: 'rgba(255,255,255,0.08)', position: 'absolute', left: 0, top: 0 }}
-      />
-      <MuiCircularProgress
-        variant="determinate"
-        value={percent}
-        size={90}
-        thickness={3.5}
-        sx={{ color: '#1976d2', position: 'absolute', left: 0, top: 0, transition: 'all 0.5s' }}
-      />
-      <Box sx={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-        <Typography sx={{ color: '#fff', fontWeight: 900, fontSize: 26, lineHeight: 1 }}>{value}</Typography>
-        <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: 12, letterSpacing: 1, mt: 0.5 }}>{label}</Typography>
-      </Box>
-    </Box>
-  );
-  return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 3, mt: 4, mb: 2 }}>
-      {renderCircle(days, 'GÜN', dayPercent)}
-      {renderCircle(hours, 'SAAT', hourPercent)}
-      {renderCircle(minutes, 'DK', minPercent)}
-      {renderCircle(seconds, 'SN', secPercent)}
-    </Box>
-  );
-};
-
-// Stat Card Tasarımları
 const StatCardGlass = ({ icon, value, label }: { icon: React.ReactNode, value: string | number, label: string }) => (
   <Box sx={{ width: 160, height: 170, background: 'rgba(255,255,255,0.12)', borderRadius: 2, p: 2, textAlign: 'center', boxShadow: '0 8px 32px 0 rgba(31,38,135,0.18)', backdropFilter: 'blur(8px)', border: '1.5px solid rgba(255,255,255,0.25)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
     <Box sx={{ mb: 1 }}>{icon}</Box>
     <Typography sx={{ color: '#fff', fontWeight: 800, fontSize: 28, lineHeight: 1 }}>{value}</Typography>
     <Typography sx={{ color: '#e3f2fd', fontWeight: 600, fontSize: 15, mt: 1 }}>{label}</Typography>
-  </Box>
-);
-const StatCardMinimal = ({ icon, value, label }: { icon: React.ReactNode, value: string | number, label: string }) => (
-  <Box sx={{ minWidth: 120, minHeight: 150, background: '#fff', borderRadius: 4, p: 2, textAlign: 'center', boxShadow: '0 2px 12px #1976d222', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-    <Box sx={{ mb: 1, background: '#e3f2fd', borderRadius: '50%', width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{icon}</Box>
-    <Typography sx={{ color: '#1976d2', fontWeight: 800, fontSize: 28, lineHeight: 1 }}>{value}</Typography>
-    <Typography sx={{ color: '#1976d2', fontWeight: 600, fontSize: 15, mt: 1 }}>{label}</Typography>
-  </Box>
-);
-const StatCardOutlined = ({ icon, value, label }: { icon: React.ReactNode, value: string | number, label: string }) => (
-  <Box sx={{ minWidth: 120, minHeight: 150, background: 'transparent', border: '2px solid #1976d2', borderRadius: 4, p: 2, textAlign: 'center', boxShadow: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-    <Box sx={{ mb: 1 }}>{icon}</Box>
-    <Typography sx={{ color: '#1976d2', fontWeight: 800, fontSize: 28, lineHeight: 1 }}>{value}</Typography>
-    <Typography sx={{ color: '#1976d2', fontWeight: 600, fontSize: 15, mt: 1 }}>{label}</Typography>
-  </Box>
-);
-const StatCardGradientBorder = ({ icon, value, label }: { icon: React.ReactNode, value: string | number, label: string }) => (
-  <Box sx={{ minWidth: 120, minHeight: 150, borderRadius: 4, p: '2px', background: 'linear-gradient(135deg, #1976d2 0%, #00eaff 100%)', boxShadow: '0 2px 12px #1976d244' }}>
-    <Box sx={{ background: '#fff', borderRadius: 4, p: 2, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 146 }}>
-      <Box sx={{ mb: 1 }}>{icon}</Box>
-      <Typography sx={{ color: '#1976d2', fontWeight: 800, fontSize: 28, lineHeight: 1 }}>{value}</Typography>
-      <Typography sx={{ color: '#1976d2', fontWeight: 600, fontSize: 15, mt: 1 }}>{label}</Typography>
-    </Box>
-  </Box>
-);
-const StatCardSoftShadow = ({ icon, value, label }: { icon: React.ReactNode, value: string | number, label: string }) => (
-  <Box sx={{ minWidth: 120, minHeight: 150, background: '#f5fafd', borderRadius: 4, p: 2, textAlign: 'center', boxShadow: '0 8px 32px #1976d222', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-    <Box sx={{ mb: 1 }}>{icon}</Box>
-    <Typography sx={{ color: '#1976d2', fontWeight: 800, fontSize: 28, lineHeight: 1 }}>{value}</Typography>
-    <Typography sx={{ color: '#1976d2', fontWeight: 600, fontSize: 15, mt: 1 }}>{label}</Typography>
   </Box>
 );
 
@@ -175,15 +123,50 @@ const HomePage: React.FC = () => {
     email: '',
     password: ''
   });
-  const [userType, setUserType] = useState<'admin' | 'user' | null>(null);
-  const [userTypeWarning, setUserTypeWarning] = useState('');
   const navigate = useNavigate();
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const [showForm, setShowForm] = useState(false);
+  
+  // Dynamic data states
+  const [stores, setStores] = useState<Store[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [dataLoading, setDataLoading] = useState(true);
+
+  // API'den verileri çek
+  const fetchData = async () => {
+    try {
+      const [storesResponse, employeesResponse, productsResponse] = await Promise.all([
+        fetch('http://localhost:5283/api/stores/active'),
+        fetch('http://localhost:5283/api/Employee'),
+        fetch('http://localhost:5283/api/Product')
+      ]);
+
+      if (storesResponse.ok) {
+        const storesData = await storesResponse.json();
+        setStores(storesData);
+      }
+
+      if (employeesResponse.ok) {
+        const employeesData = await employeesResponse.json();
+        setEmployees(employeesData);
+      }
+
+      if (productsResponse.ok) {
+        const productsData = await productsResponse.json();
+        setProducts(productsData);
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setDataLoading(false);
+    }
+  };
 
   useEffect(() => {
     setTimeout(() => setShowForm(true), 100); // 100ms sonra formu göster
+    fetchData(); // Veri çekmeyi başlat
   }, []);
 
   useEffect(() => {
@@ -204,72 +187,52 @@ const HomePage: React.FC = () => {
     }, 200);
   }, []);
 
-  const handleUserTypeSelect = (type: 'admin' | 'user') => {
-    setUserType(type);
-    setUserTypeWarning('');
-    setError('');
-    setFormData({ email: '', password: '' });
-  };
-
-  const handleInputFocus = () => {
-    if (!userType) {
-      setUserTypeWarning('Lütfen önce kullanıcı tipini seçin (Admin veya User).');
-    } else {
-      setUserTypeWarning('');
-    }
-  };
+  // Kullanıcı tipi seçimi ve admin ile ilgili kodlar kaldırıldı
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setUserTypeWarning('');
-    if (!userType) {
-      setUserTypeWarning('Lütfen önce kullanıcı tipini seçin (Admin veya User).');
-      return;
-    }
     setIsLoading(true);
+    
     try {
-      // Admin için backend kontrolü
-      if (userType === 'admin') {
-        const response = await fetch('http://localhost:5283/api/User/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData),
-        });
-        
-        if (response.ok) {
-          const userData = await response.json();
-          if (userData.role === 3) { // Admin role
-            navigate('/admin');
-            return;
-          } else {
-            setError('Bu hesap admin yetkisine sahip değil.');
-            setIsLoading(false);
-            return;
-          }
-        } else {
-          setError('Admin e-posta veya şifre hatalı.');
-          setIsLoading(false);
-          return;
-        }
-      }
-      // User için backend kontrolü
       const response = await fetch('http://localhost:5283/api/User/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify(formData),
       });
+      
       if (response.ok) {
         const userData = await response.json();
-        if (userData.role === 3) { // Admin role
-          navigate('/admin'); // Admin paneline yönlendir
+        
+        // Token'ı localStorage'a kaydet
+        localStorage.setItem('token', userData.token);
+        localStorage.setItem('userRole', userData.user.role);
+        localStorage.setItem('userData', JSON.stringify(userData.user));
+        
+        // Eğer admin ise uyarı ver, değilse mağaza detay sayfasına yönlendir
+        if (userData.user.role === 'admin') {
+          setError('Bu hesap admin yetkisine sahip. Lütfen admin panelinden giriş yapın.');
+          localStorage.removeItem('token');
+          localStorage.removeItem('userRole');
+          localStorage.removeItem('userData');
         } else {
-          navigate('/dashboard'); // Mağaza dashboarduna yönlendir
+          // Mağaza çalışanı ise mağaza detay sayfasına yönlendir
+          if (userData.user.storeId) {
+            navigate(`/store/${userData.user.storeId}`);
+          } else {
+            navigate('/dashboard');
+          }
         }
       } else {
+        const errorData = await response.text();
         setError('Girdiğiniz bilgiler hatalı');
+        console.error('Login error:', errorData);
       }
-    } catch {
+    } catch (error) {
+      console.error('Login error:', error);
       setError('Giriş yapılırken bir hata oluştu');
     } finally {
       setIsLoading(false);
@@ -288,6 +251,9 @@ const HomePage: React.FC = () => {
   const autofillStyles = (
     <Global
       styles={`
+        body {
+          background: transparent !important;
+        }
         input:-webkit-autofill,
         input:-webkit-autofill:focus,
         input:-webkit-autofill:hover,
@@ -327,7 +293,7 @@ const HomePage: React.FC = () => {
           position: 'relative',
           display: 'flex',
           flexDirection: 'column',
-          background: 'none',
+          background: 'transparent',
           zIndex: 0,
         }}>
           {/* Arka plan görseli ve koyu overlay */}
@@ -338,7 +304,7 @@ const HomePage: React.FC = () => {
             width: '100%',
             height: '100%',
             background: `url(${lcwStore}) center center/cover no-repeat`,
-            filter: 'blur(6px) brightness(0.6)',
+            filter: 'blur(3px) brightness(0.22)', // DAHA FAZLA KARARTMA
           }} />
           <Box sx={{
             position: 'absolute',
@@ -346,7 +312,7 @@ const HomePage: React.FC = () => {
             zIndex: 1,
             width: '100%',
             height: '100%',
-            background: 'rgba(24,28,36,0.65)', // daha koyu ve şeffaf overlay
+            background: 'rgba(24,28,36,0.38)', // DAHA DA ŞEFFAF KOYU OVERLAY
           }} />
           <Box sx={{
             flex: 1,
@@ -368,49 +334,32 @@ const HomePage: React.FC = () => {
             }}>
               <Card sx={{
                 width: '100%',
-                maxWidth: 420,
+                maxWidth: 500,
+                px: 3,
                 borderRadius: 3,
                 boxShadow: '0 8px 32px #0008',
-                background: 'rgba(24,28,36,0.85)',
+                background: 'rgba(24,28,36,0.92)', // KOYU KART
+                color: '#fff', // BEYAZ YAZI
                 border: 'none',
                 backdropFilter: 'blur(2px)',
                 animation: 'fadeIn 1s',
               }}>
                 <CardContent sx={{ p: 4 }}>
                   {/* LC Waikiki Logo */}
-                  <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-                    <img src={lcwLogo} alt="LC Waikiki" style={{ height: 48, objectFit: 'contain' }} />
+                  <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 2 }}>
+                    <img src={lcwLogo} alt="LC Waikiki" style={{ width: 180, height: 64, objectFit: 'contain', display: 'block' }} />
                   </Box>
-                  <Typography variant="h5" sx={{ fontWeight: 700, textAlign: 'center', mb: 3, color: '#fff', letterSpacing: 1 }}>
+                  <Typography variant="h5" sx={{ fontWeight: 700, textAlign: 'center', mb: 3, color: '#fff', letterSpacing: 1, fontFamily: 'Poppins, Montserrat, sans-serif' }}>
                     Giriş Yap
                   </Typography>
-                  {/* Kullanıcı tipi seçimi */}
-                  <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 2 }}>
-                    <Button
-                      variant={userType === 'admin' ? 'contained' : 'outlined'}
-                      color="primary"
-                      onClick={() => handleUserTypeSelect('admin')}
-                      sx={{ fontWeight: 700, borderRadius: 2 }}
-                    >
-                      Admin
-                    </Button>
-                    <Button
-                      variant={userType === 'user' ? 'contained' : 'outlined'}
-                      color="primary"
-                      onClick={() => handleUserTypeSelect('user')}
-                      sx={{ fontWeight: 700, borderRadius: 2 }}
-                    >
-                      User
-                    </Button>
-                  </Box>
+                  {/* Kullanıcı tipi seçimi kaldırıldı */}
                   {/* Güvenli Giriş */}
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2, gap: 1 }}>
-                    <Lock sx={{ color: '#90caf9', fontSize: 20, mr: 0.5 }} />
-                    <Typography sx={{ color: '#90caf9', fontWeight: 500, fontSize: 15 }}>Güvenli Giriş</Typography>
+                    <Lock sx={{ color: '#1976d2', fontSize: 20, mr: 0.5 }} />
+                    <Typography sx={{ color: '#fff', fontWeight: 500, fontSize: 15 }}>
+                      Güvenli Giriş
+                    </Typography>
                   </Box>
-                  {userTypeWarning && (
-                    <Alert severity="info" sx={{ mb: 2 }}>{userTypeWarning}</Alert>
-                  )}
                   {error && (
                     <Alert severity="error" sx={{ mb: 3 }}>
                       {error}
@@ -425,19 +374,18 @@ const HomePage: React.FC = () => {
                         type="email"
                         value={formData.email}
                         onChange={handleChange}
-                        onFocus={handleInputFocus}
                         inputRef={emailRef}
-                        sx={{ mb: 3, input: { color: '#fff', background: 'transparent', boxShadow: 'none !important' }, label: { color: '#90caf9' }, backgroundColor: 'transparent', borderRadius: 2, '& .MuiOutlinedInput-root': { backgroundColor: 'transparent', color: '#fff', borderColor: '#90caf9', '& fieldset': { borderColor: '#90caf9', backgroundColor: 'transparent', }, '&:hover fieldset': { borderColor: '#90caf9', backgroundColor: 'transparent', }, '&.Mui-focused fieldset': { borderColor: '#90caf9', backgroundColor: 'transparent', }, }, }}
+                        sx={{ mb: 3, input: { color: '#fff', background: 'transparent', boxShadow: 'none !important' }, label: { color: '#fff' }, backgroundColor: 'transparent', borderRadius: 2, '& .MuiOutlinedInput-root': { backgroundColor: 'transparent', color: '#fff', borderColor: '#1976d2', '& fieldset': { borderColor: '#1976d2', backgroundColor: 'transparent', }, '&:hover fieldset': { borderColor: '#1976d2', backgroundColor: 'transparent', }, '&.Mui-focused fieldset': { borderColor: '#1976d2', backgroundColor: 'transparent', }, }, }}
                         required
                         InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">
-                              <Email sx={{ color: '#90caf9' }} />
+                              <Email sx={{ color: '#1976d2' }} />
                             </InputAdornment>
                           ),
                           style: { color: '#fff', background: 'transparent', boxShadow: 'none' },
                         }}
-                        InputLabelProps={{ style: { color: '#90caf9', background: 'transparent' } }}
+                        InputLabelProps={{ style: { color: '#fff', background: 'transparent' } }}
                         focused
                       />
                       <TextField
@@ -447,26 +395,25 @@ const HomePage: React.FC = () => {
                         type={showPassword ? 'text' : 'password'}
                         value={formData.password}
                         onChange={handleChange}
-                        onFocus={handleInputFocus}
                         inputRef={passwordRef}
-                        sx={{ mb: 3, input: { color: '#fff', background: 'transparent', boxShadow: 'none !important' }, label: { color: '#90caf9' }, backgroundColor: 'transparent', borderRadius: 2, '& .MuiOutlinedInput-root': { backgroundColor: 'transparent', color: '#fff', borderColor: '#90caf9', '& fieldset': { borderColor: '#90caf9', backgroundColor: 'transparent', }, '&:hover fieldset': { borderColor: '#90caf9', backgroundColor: 'transparent', }, '&.Mui-focused fieldset': { borderColor: '#90caf9', backgroundColor: 'transparent', }, }, }}
+                        sx={{ mb: 3, input: { color: '#fff', background: 'transparent', boxShadow: 'none !important' }, label: { color: '#fff' }, backgroundColor: 'transparent', borderRadius: 2, '& .MuiOutlinedInput-root': { backgroundColor: 'transparent', color: '#fff', borderColor: '#1976d2', '& fieldset': { borderColor: '#1976d2', backgroundColor: 'transparent', }, '&:hover fieldset': { borderColor: '#1976d2', backgroundColor: 'transparent', }, '&.Mui-focused fieldset': { borderColor: '#1976d2', backgroundColor: 'transparent', }, }, }}
                         required
                         InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">
-                              <Lock sx={{ color: '#90caf9' }} />
+                              <Lock sx={{ color: '#1976d2' }} />
                             </InputAdornment>
                           ),
                           endAdornment: (
                             <InputAdornment position="end">
                               <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                                {showPassword ? <VisibilityOff sx={{ color: '#90caf9' }} /> : <Visibility sx={{ color: '#90caf9' }} />}
+                                {showPassword ? <VisibilityOff sx={{ color: '#1976d2' }} /> : <Visibility sx={{ color: '#1976d2' }} />}
                               </IconButton>
                             </InputAdornment>
                           ),
                           style: { color: '#fff', background: 'transparent', boxShadow: 'none' },
                         }}
-                        InputLabelProps={{ style: { color: '#90caf9', background: 'transparent' } }}
+                        InputLabelProps={{ style: { color: '#fff', background: 'transparent' } }}
                         focused
                       />
                       <Button
@@ -517,13 +464,32 @@ const HomePage: React.FC = () => {
               justifyContent: 'center',
               pl: { xs: 0, md: 6, lg: 12 },
             }}>
-              <Typography variant="h3" sx={{ fontWeight: 900, color: '#1976d2', mb: 2, fontFamily: 'Montserrat, sans-serif', textShadow: '0 2px 8px #1976d2', fontSize: { xs: 28, md: 38, lg: 48 } }}>
+              <Typography
+                variant="h3"
+                sx={{
+                  fontWeight: 900,
+                  mb: 2,
+                  fontFamily: 'Poppins, Montserrat, sans-serif', // DAHA MODERN FONT
+                  fontSize: { xs: 28, md: 38, lg: 48 },
+                  letterSpacing: 1,
+                  px: 2.5,
+                  py: 1.5,
+                  borderRadius: 3,
+                  display: 'inline-block',
+                  background: 'rgba(24,28,36,0.65)', // FOOTER İLE UYUMLU KOYU KUTU
+                  boxShadow: '0 4px 24px 0 rgba(0,0,0,0.18)',
+                  color: '#fff', // BEYAZ YAZI
+                  textStroke: '1.5px #1976d2',
+                  WebkitTextStroke: '1.5px #1976d2',
+                  textShadow: '0 2px 12px #1976d2, 0 1px 0 #fff',
+                }}
+              >
                 LC Waikiki Yönetim Paneli
               </Typography>
-              <Typography sx={{ color: '#fff', fontWeight: 600, mb: 3, maxWidth: 500, fontSize: { xs: 16, md: 20, lg: 24 }, lineHeight: 1.5 }}>
+              <Typography sx={{ color: '#fff', fontWeight: 600, mb: 3, maxWidth: 500, fontSize: { xs: 16, md: 20, lg: 24 }, lineHeight: 1.5, textShadow: '0 2px 8px #1976d2' }}>
                 LC Waikiki, 2025 yılında ihracatını 1,4 milyar dolara çıkaracak, 2026 yılı sonuna kadar da Avrupa'nın en büyük üç hazır giyim markasından biri olmayı ve İngiltere, Almanya, Fransa gibi gelişmiş pazarlara adım atmayı hedefliyor.
               </Typography>
-              <CircularCountdown />
+              <Countdown />
             </Box>
           </Box>
           <Footer />

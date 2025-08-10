@@ -9,5 +9,6 @@ namespace LCDataViev.API.Repositories
         Task<IEnumerable<User>> GetUsersByStoreIdAsync(int storeId);
         Task<User?> GetUserWithDetailsAsync(int id);
         Task<int> GetUserCountByStatusAsync(bool isActive);
+        Task<User?> GetByEmailAsync(string email);
     }
 } 

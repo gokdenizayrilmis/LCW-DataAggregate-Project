@@ -21,7 +21,7 @@ namespace LCDataViev.API.Repositories
             return await _dbSet.FindAsync(id);
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync()
+        public virtual async Task<IEnumerable<T>> GetAllAsync()
         {
             return await _dbSet.ToListAsync();
         }
@@ -106,7 +106,7 @@ namespace LCDataViev.API.Repositories
         // Exists Operations
         public async Task<bool> ExistsAsync(int id)
         {
-            return await GetByIdAsync(id) != null;
+            return await _dbSet.FindAsync(id) != null;
         }
 
         public async Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate)

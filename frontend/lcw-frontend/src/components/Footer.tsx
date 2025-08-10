@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography, IconButton, Container, Divider } from '@mui/material';
+import { Box, Typography, IconButton, Divider } from '@mui/material';
 import { GitHub, Instagram, LinkedIn } from '@mui/icons-material';
 
 const Footer: React.FC = () => {

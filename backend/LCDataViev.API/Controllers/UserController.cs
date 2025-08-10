@@ -2,6 +2,12 @@ using Microsoft.AspNetCore.Mvc;
 using LCDataViev.API.Repositories;
 using LCDataViev.API.Models.Entities;
 using LCDataViev.API.Models.DTOs;
+using BCrypt.Net;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace LCDataViev.API.Controllers
 {
@@ -11,12 +17,14 @@ namespace LCDataViev.API.Controllers
     {
         private readonly IUserRepository _userRepository;
         private readonly IStoreRepository _storeRepository;
+        private readonly INotificationRepository _notificationRepository;
         private readonly ILogger<UserController> _logger;
 
-        public UserController(IUserRepository userRepository, IStoreRepository storeRepository, ILogger<UserController> logger)
+        public UserController(IUserRepository userRepository, IStoreRepository storeRepository, INotificationRepository notificationRepository, ILogger<UserController> logger)
         {
             _userRepository = userRepository;
             _storeRepository = storeRepository;
+            _notificationRepository = notificationRepository;
             _logger = logger;
         }
 
@@ -99,13 +107,18 @@ namespace LCDataViev.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult<UserResponseDto>> CreateUser(CreateUserDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
-            var store = await _storeRepository.GetByIdAsync(dto.StoreId);
-            if (store == null)
-                return BadRequest("Store not found");
+            Store? store = null;
+            if (dto.StoreId.HasValue)
+            {
+                store = await _storeRepository.GetByIdAsync(dto.StoreId.Value);
+                if (store == null)
+                    return BadRequest("Store not found");
+            }
             var user = new User
             {
                 Name = dto.Name,
@@ -117,6 +130,14 @@ namespace LCDataViev.API.Controllers
                 UpdatedAt = DateTime.UtcNow
             };
             var created = await _userRepository.AddAsync(user);
+            // Bildirim ekle
+            await _notificationRepository.AddAsync(new Notification {
+                Message = $"Yeni kullanıcı eklendi: {created.Name} {created.Surname}",
+                Type = "Success",
+                UserId = created.Id,
+                StoreId = created.StoreId,
+                CreatedAt = DateTime.UtcNow
+            });
             var response = new UserResponseDto
             {
                 Id = created.Id,
@@ -124,7 +145,7 @@ namespace LCDataViev.API.Controllers
                 Surname = created.Surname,
                 Email = created.Email,
                 StoreId = created.StoreId,
-                StoreName = store.Name,
+                StoreName = store?.Name,
                 IsActive = created.IsActive,
                 CreatedAt = created.CreatedAt,
                 UpdatedAt = created.UpdatedAt
@@ -132,7 +153,66 @@ namespace LCDataViev.API.Controllers
             return CreatedAtAction(nameof(GetUser), new { id = created.Id }, response);
         }
 
+        [HttpPost("login")]
+        [AllowAnonymous]
+        public async Task<IActionResult> Login([FromBody] LoginUserDto dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var user = await _userRepository.GetByEmailAsync(dto.Email);
+            if (user == null)
+                return Unauthorized("Kullanıcı bulunamadı.");
+
+            if (string.IsNullOrEmpty(user.PasswordHash))
+                return Unauthorized("Şifre hatalı.");
+
+            _logger.LogInformation($"Login attempt for email: {dto.Email}, Password: {dto.Password}, Stored Hash: {user.PasswordHash}");
+            
+            bool isPasswordValid = BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash);
+            _logger.LogInformation($"Password verification result: {isPasswordValid}");
+            
+            if (!isPasswordValid)
+                return Unauthorized("Şifre yanlış.");
+
+            // JWT Token üretimi
+            var jwtSettings = HttpContext.RequestServices.GetRequiredService<IConfiguration>().GetSection("JwtSettings");
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey is not configured")));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var claims = new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                new Claim(ClaimTypes.Role, user.Role == LCDataViev.API.Models.Enums.UserRole.Admin ? "admin" : "user"),
+                new Claim("name", user.Name),
+                new Claim("storeId", user.StoreId?.ToString() ?? "")
+            };
+            var token = new JwtSecurityToken(
+                issuer: jwtSettings["Issuer"],
+                audience: jwtSettings["Audience"],
+                claims: claims,
+                expires: DateTime.UtcNow.AddHours(int.Parse(jwtSettings["ExpirationHours"] ?? "24")),
+                signingCredentials: creds
+            );
+            var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+
+            return Ok(new {
+                token = tokenString,
+                user = new {
+                    user.Id,
+                    user.Username,
+                    user.Name,
+                    user.Surname,
+                    user.Email,
+                    Role = user.Role == LCDataViev.API.Models.Enums.UserRole.Admin ? "admin" : "user",
+                    user.IsActive,
+                    user.StoreId
+                }
+            });
+        }
+
         [HttpPut("{id}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> UpdateUser(int id, UpdateUserDto dto)
         {
             if (!ModelState.IsValid)
@@ -140,9 +220,13 @@ namespace LCDataViev.API.Controllers
             var user = await _userRepository.GetByIdAsync(id);
             if (user == null)
                 return NotFound();
-            var store = await _storeRepository.GetByIdAsync(dto.StoreId);
-            if (store == null)
-                return BadRequest("Store not found");
+            Store? store = null;
+            if (dto.StoreId.HasValue)
+            {
+                store = await _storeRepository.GetByIdAsync(dto.StoreId.Value);
+                if (store == null)
+                    return BadRequest("Store not found");
+            }
             user.Name = dto.Name;
             user.Surname = dto.Surname;
             user.Email = dto.Email;
@@ -150,16 +234,33 @@ namespace LCDataViev.API.Controllers
             user.IsActive = dto.IsActive;
             user.UpdatedAt = DateTime.UtcNow;
             await _userRepository.UpdateAsync(user);
+            // Bildirim ekle
+            await _notificationRepository.AddAsync(new Notification {
+                Message = $"Kullanıcı güncellendi: {user.Name} {user.Surname}",
+                Type = "Info",
+                UserId = user.Id,
+                StoreId = user.StoreId,
+                CreatedAt = DateTime.UtcNow
+            });
             return NoContent();
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> DeleteUser(int id)
         {
             var user = await _userRepository.GetByIdAsync(id);
             if (user == null)
                 return NotFound();
             await _userRepository.DeleteAsync(id);
+            // Bildirim ekle
+            await _notificationRepository.AddAsync(new Notification {
+                Message = $"Kullanıcı silindi: {user.Name} {user.Surname}",
+                Type = "Error",
+                UserId = user.Id,
+                StoreId = user.StoreId,
+                CreatedAt = DateTime.UtcNow
+            });
             return NoContent();
         }
     }

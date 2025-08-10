@@ -3,38 +3,28 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace LCDataViev.API.Models.Entities
 {
-    [Table("Inventory")]
     public class Inventory
     {
         [Key]
         public int Id { get; set; }
-        
+
         [Required]
-        [ForeignKey("Store")]
         public int StoreId { get; set; }
-        
+
         [Required]
-        [StringLength(100)]
-        public string ProductName { get; set; } = string.Empty;
-        
+        public int ProductId { get; set; }
+
         [Required]
-        [Range(0, int.MaxValue)]
-        public int CurrentStock { get; set; } = 0;
-        
-        [Range(0, int.MaxValue)]
-        public int MinStockLevel { get; set; } = 10;
-        
-        [Range(0, int.MaxValue)]
-        public int MaxStockLevel { get; set; } = 100;
-        
-        public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
-        
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        
         public int Quantity { get; set; }
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-        
-        // Navigation Properties
-        public virtual Store Store { get; set; } = null!;
+
+        [Required]
+        public DateTime LastUpdated { get; set; }
+
+        // Navigation properties
+        [ForeignKey("StoreId")]
+        public virtual Store Store { get; set; }
+
+        [ForeignKey("ProductId")]
+        public virtual Product Product { get; set; }
     }
 }

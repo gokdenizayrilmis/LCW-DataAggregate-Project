@@ -14,8 +14,7 @@ namespace LCDataViev.API.Models.DTOs
         [StringLength(100)]
         [EmailAddress]
         public string Email { get; set; } = string.Empty;
-        [Required]
-        public int StoreId { get; set; }
+        public int? StoreId { get; set; }
         public bool IsActive { get; set; } = true;
     }
 
@@ -31,8 +30,7 @@ namespace LCDataViev.API.Models.DTOs
         [StringLength(100)]
         [EmailAddress]
         public string Email { get; set; } = string.Empty;
-        [Required]
-        public int StoreId { get; set; }
+        public int? StoreId { get; set; }
         public bool IsActive { get; set; }
     }
 
@@ -42,7 +40,7 @@ namespace LCDataViev.API.Models.DTOs
         public string Name { get; set; } = string.Empty;
         public string Surname { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
-        public int StoreId { get; set; }
+        public int? StoreId { get; set; }
         public string? StoreName { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }

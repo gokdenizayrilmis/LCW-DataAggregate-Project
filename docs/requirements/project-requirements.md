@@ -1,384 +1,128 @@
-\# Proje Gereksinim Dokümanı
+# LCW-Project – Gereksinim Dokümanı
 
+## 1. Yazılımın Genel Tanımı
 
+### 1.1 Amaç
+LCW-Project, LC Waikiki mağazalarının satış, stok, kullanıcı ve mağaza yönetimi süreçlerini merkezi ve güvenli bir şekilde yönetmek için geliştirilmiş bir veri toplama ve yönetim sistemidir. Proje, mağaza ve kullanıcı bazında detaylı veri takibi, raporlama ve yönetimsel işlemleri kolaylaştırmayı hedefler.
 
-\## 📋 Proje Genel Bakış
+### 1.2 Kapsam
+- LC Waikiki mağazaları ve mağaza yöneticileri
+- Şirket yöneticileri (admin)
+- Satış, stok, kullanıcı ve mağaza verilerinin yönetimi
+- Raporlama ve istatistiksel analiz
 
+---
 
+## 2. Kullanılan Teknolojiler ve Mimarisi
 
-\### Proje Adı
+### 2.1 Backend
+- **.NET Core 9.0**: API geliştirme
+- **Entity Framework Core 9.0.7**: ORM ve veri erişimi
+- **PostgreSQL**: Veritabanı yönetimi
+- **BCrypt.Net-Next**: Şifrelerin güvenli şekilde hash’lenmesi
+- **Serilog**: Loglama
+- **Repository Pattern**: Veri erişim katmanı
+- **Dependency Injection**: Servis yönetimi
+- **RESTful API**: CRUD işlemleri için
+- **Cookie Authentication**: Kimlik doğrulama
+- **Role-Based Access Control (RBAC)**: Yetkilendirme
 
-LCW Data Aggregate Project
+### 2.2 Frontend
+- **React 19.1.0 + TypeScript 4.9.5**: Modern web arayüzü
+- **Material-UI (MUI 7.2.0)**: UI bileşenleri ve responsive tasarım
+- **React Router DOM 6.28.0**: Sayfa yönlendirme
+- **Fetch API**: Backend ile iletişim
+- **Local Storage**: Kullanıcı oturum ve rol yönetimi
 
+### 2.3 Genel
+- **Git**: Sürüm kontrolü (develop/main branch yapısı)
+- **Dokümantasyon**: Markdown formatında, docs klasöründe
 
+---
 
-\### Proje Amacı
+## 3. Yazılım Geliştirme Metodolojisi
 
-Mağazalardan veri toplayan, işleyen ve görselleştiren kapsamlı bir sistem geliştirmek.
+- **Agile/Kanban**: İşler yapılacaklar listesi (todo) ile yönetilir, her özellik adım adım geliştirilir ve test edilir.
+- **Branching**: Geliştirme develop branch’inde yapılır, ana sürümler main branch’e aktarılır.
+- **Commit Mesajları**: Türkçe ve açıklayıcı olmalıdır.
 
+---
 
+## 4. Fonksiyonel Gereksinimler
 
-\## 🎯 V1 Gereksinimleri
+### 4.1 Kimlik Doğrulama ve Yetkilendirme
+- Kullanıcılar ve adminler sisteme giriş yapabilmelidir.
+- Admin, yeni mağaza ve kullanıcı ekleyebilmeli, düzenleyebilmeli ve silebilmelidir.
+- Mağaza kullanıcıları sadece kendi mağaza verilerini görebilmelidir.
+- Giriş işlemleri güvenli şekilde (hash’li şifre, cookie authentication) yapılmalıdır.
 
+### 4.2 Mağaza Yönetimi
+- Mağaza ekleme, düzenleme, silme işlemleri yapılabilmelidir.
+- Her mağaza için giriş bilgileri (email/şifre) admin tarafından atanır.
+- Mağaza bilgileri: Ad, adres, email, şifre, telefon, durum (aktif/pasif)
 
+### 4.3 Kullanıcı Yönetimi
+- Kullanıcı ekleme, düzenleme, silme işlemleri yapılabilmelidir.
+- Kullanıcılar mağazalara atanabilir.
 
-\### 1. Backend API Servisleri
+### 4.4 Satış ve Stok Yönetimi
+- Satış ve stok verileri mağaza bazında yönetilebilmelidir.
+- Satış, iade, envanter işlemleri API üzerinden yapılabilir.
 
+### 4.5 Bildirim Sistemi
+- Önemli işlemler sonrası anlık (toast/snackbar) ve kalıcı (veritabanında loglanan) bildirimler gösterilmelidir.
 
+### 4.6 Raporlama ve İstatistikler
+- Toplam satış, kullanıcı, mağaza, envanter gibi özet raporlar ve istatistikler sunulmalıdır.
 
-\#### 1.1 Satış Servisi (`/api/satis`)
+---
 
-\- \*\*POST\*\* `/api/satis` - Yeni satış kaydetme
+## 5. Fonksiyonel Olmayan Gereksinimler
 
-\- \*\*GET\*\* `/api/satis` - Satış listesi getirme
+### 5.1 Güvenlik
+- Şifreler hash’li olarak saklanacaktır.
+- Sadece yetkili kullanıcılar ilgili işlemleri yapabilir.
+- API endpoint’lerinde rol bazlı kontrol uygulanacaktır.
 
-\- \*\*GET\*\* `/api/satis/{id}` - Belirli satış detayı
+### 5.2 Performans
+- Tüm işlemler ortalama 5 saniyeden kısa sürede tamamlanmalıdır.
+- Raporlama ve listeleme işlemleri optimize edilmelidir.
 
-\- \*\*PUT\*\* `/api/satis/{id}` - Satış güncelleme
+### 5.3 Sistem Gereksinimleri
+- Backend ve veritabanı aynı domain’de çalışmalıdır.
+- Erişimler intranet üzerinden sınırlandırılabilir.
 
-\- \*\*DELETE\*\* `/api/satis/{id}` - Satış silme
+### 5.4 Entegrasyon
+- Gerekirse, sistem diğer kurumsal uygulamalarla entegre edilebilir (örn. merkezi raporlama).
 
-\- \*\*GET\*\* `/api/satis/istatistikler` - Satış istatistikleri
+### 5.5 Kullanıcı Araçları
+- Uygulama Google Chrome ve modern tarayıcılarda sorunsuz çalışmalıdır.
+- Internet Explorer desteklenmeyecektir.
 
+### 5.6 Bakım ve İzleme
+- Sistem logları tutulacak ve izlenecektir.
+- Veritabanı günlük yedeklenecek, yedekler aylık arşivlenecektir.
 
+---
 
-\#### 1.2 İade Servisi (`/api/iade`)
+## 6. Sistem Mimarisi
 
-\- \*\*POST\*\* `/api/iade` - Yeni iade kaydetme
+```mermaid
+graph TD
+  A[React + MUI Frontend] -- HTTP/REST --> B[.NET Core API]
+  B -- EF Core --> C[(PostgreSQL)]
+  B -- Loglama --> D[Serilog]
+  B -- Kimlik Doğrulama --> E[Cookie Auth]
+  B -- Bildirimler --> F[Notification Table]
+```
 
-\- \*\*GET\*\* `/api/iade` - İade listesi getirme
+---
 
-\- \*\*GET\*\* `/api/iade/{id}` - Belirli iade detayı
+## 7. Ekler
 
-\- \*\*PUT\*\* `/api/iade/{id}` - İade güncelleme
+- Kullanıcı senaryoları ve test senaryoları docs/test-cases/test-scenarios.md dosyasında tutulacaktır.
+- Teknik analiz ve mimari detaylar docs/analysis/technical-analysis.md ve docs/architecture/ klasöründe yer alacaktır.
 
-\- \*\*DELETE\*\* `/api/iade/{id}` - İade silme
+---
 
-\- \*\*GET\*\* `/api/iade/istatistikler` - İade istatistikleri
-
-
-
-\#### 1.3 Stok Servisi (`/api/stok`)
-
-\- \*\*POST\*\* `/api/stok` - Yeni stok kaydetme
-
-\- \*\*GET\*\* `/api/stok` - Stok listesi getirme
-
-\- \*\*GET\*\* `/api/stok/{id}` - Belirli stok detayı
-
-\- \*\*PUT\*\* `/api/stok/{id}` - Stok güncelleme
-
-\- \*\*DELETE\*\* `/api/stok/{id}` - Stok silme
-
-\- \*\*GET\*\* `/api/stok/istatistikler` - Stok istatistikleri
-
-
-
-\### 2. Loglama Sistemi
-
-
-
-\#### 2.1 Loglanacak Bilgiler
-
-\- Request \& Response verileri
-
-\- Header bilgileri
-
-\- Token bilgileri
-
-\- Body içeriği
-
-\- Timestamp
-
-\- User bilgileri
-
-
-
-\#### 2.2 Loglama Seviyeleri
-
-\- \*\*INFO\*\*: Normal işlemler
-
-\- \*\*WARNING\*\*: Uyarı durumları
-
-\- \*\*ERROR\*\*: Hata durumları
-
-\- \*\*DEBUG\*\*: Geliştirme bilgileri
-
-
-
-\### 3. Dashboard Özellikleri
-
-
-
-\#### 3.1 V1 - Aktif Mağaza Sayısı
-
-\- Toplam aktif mağaza sayısı
-
-\- Mağaza durumu (aktif/pasif)
-
-\- Son güncelleme zamanı
-
-
-
-\#### 3.2 V2 - Anlık Toplam Veriler
-
-\- Anlık toplam stok miktarı
-
-\- Anlık toplam satış sayısı
-
-\- Anlık toplam iade sayısı
-
-\- Grafik gösterimi
-
-
-
-\#### 3.3 V3 - Mağaza Bazlı Veriler
-
-\- Mağaza bazlı stok durumu
-
-\- Mağaza bazlı satış verileri
-
-\- Mağaza bazlı iade verileri
-
-\- Karşılaştırmalı grafikler
-
-
-
-\#### 3.4 V4 - Kümülatif Toplamlar
-
-\- Son 1 haftalık toplam satış
-
-\- Son 1 haftalık toplam iade
-
-\- Son 1 haftalık stok değişimi
-
-\- Trend analizi
-
-
-
-\## 🔐 Güvenlik Gereksinimleri
-
-
-
-\### 1. Authentication
-
-\- OpenId Connect kullanımı
-
-\- JWT token tabanlı authentication
-
-\- Role-based authorization
-
-
-
-\### 2. Authorization
-
-\- \*\*Admin\*\*: Tüm işlemler
-
-\- \*\*Manager\*\*: Mağaza bazlı işlemler
-
-\- \*\*User\*\*: Sadece okuma işlemleri
-
-
-
-\## 📊 Veritabanı Gereksinimleri
-
-
-
-\### 1. PostgreSQL (Ana Veri)
-
-\- Satış tablosu
-
-\- İade tablosu
-
-\- Stok tablosu
-
-\- Mağaza tablosu
-
-\- Kullanıcı tablosu
-
-
-
-\### 2. MongoDB (Loglama)
-
-\- API log tablosu
-
-\- Error log tablosu
-
-\- Performance log tablosu
-
-
-
-\### 3. Redis (Cache)
-
-\- Session cache
-
-\- API response cache
-
-\- Dashboard data cache
-
-
-
-\## 🚀 Performans Gereksinimleri
-
-
-
-\### 1. Response Time
-
-\- API yanıt süresi: < 200ms
-
-\- Dashboard yükleme: < 2 saniye
-
-\- Grafik render: < 1 saniye
-
-
-
-\### 2. Scalability
-
-\- Eşzamanlı kullanıcı: 100+
-
-\- Günlük API çağrısı: 10,000+
-
-\- Veri boyutu: 1GB+
-
-
-
-\## 📱 Kullanıcı Arayüzü Gereksinimleri
-
-
-
-\### 1. Responsive Design
-
-\- Desktop (1920x1080)
-
-\- Tablet (768x1024)
-
-\- Mobile (375x667)
-
-
-
-\### 2. Browser Desteği
-
-\- Chrome 90+
-
-\- Firefox 88+
-
-\- Safari 14+
-
-\- Edge 90+
-
-
-
-\## 🧪 Test Gereksinimleri
-
-
-
-\### 1. Unit Tests
-
-\- Her API endpoint için test
-
-\- Business logic testleri
-
-\- Repository testleri
-
-
-
-\### 2. Integration Tests
-
-\- API entegrasyon testleri
-
-\- Database entegrasyon testleri
-
-\- Authentication testleri
-
-
-
-\### 3. Performance Tests
-
-\- Load testing
-
-\- Stress testing
-
-\- Endurance testing
-
-
-
-\## 📅 Proje Zaman Çizelgesi
-
-
-
-\### Faz 1 (Hafta 1-2)
-
-\- Backend temel yapı
-
-\- Veritabanı kurulumu
-
-\- İlk API endpoint'leri
-
-
-
-\### Faz 2 (Hafta 3-4)
-
-\- Authentication sistemi
-
-\- Loglama sistemi
-
-\- Temel dashboard
-
-
-
-\### Faz 3 (Hafta 5-6)
-
-\- Frontend geliştirme
-
-\- Grafik entegrasyonu
-
-\- UI/UX iyileştirmeleri
-
-
-
-\### Faz 4 (Hafta 7-8)
-
-\- Test ve optimizasyon
-
-\- Deployment
-
-\- Dokümantasyon
-
-
-
-\## ✅ Kabul Kriterleri
-
-
-
-\### 1. Fonksiyonel Gereksinimler
-
-\- \[ ] Tüm API endpoint'leri çalışıyor
-
-\- \[ ] Dashboard tüm özellikleri gösteriyor
-
-\- \[ ] Authentication sistemi çalışıyor
-
-\- \[ ] Loglama sistemi aktif
-
-
-
-\### 2. Performans Kriterleri
-
-\- \[ ] API response time < 200ms
-
-\- \[ ] Dashboard load time < 2s
-
-\- \[ ] 100+ eşzamanlı kullanıcı desteği
-
-
-
-\### 3. Güvenlik Kriterleri
-
-\- \[ ] JWT token doğrulama
-
-\- \[ ] Role-based access control
-
-\- \[ ] Input validation
-
-\- \[ ] SQL injection koruması
-
+**Not:** Bu doküman, projenin mevcut durumunu ve planlanan geliştirmeleri yansıtmaktadır. Gereksinimler değiştikçe güncellenmelidir.
