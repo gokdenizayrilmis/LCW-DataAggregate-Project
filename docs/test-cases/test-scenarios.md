@@ -1,162 +1,67 @@
-# Test Senaryoları ve Kullanım Senaryoları
+# LCW-Project Test Senaryoları & Kapsamı
 
 ---
 
-## 1. Sistem Mimarisi
+## 1. Admin Girişi
+- **Amaç:** Admin'in sisteme güvenli girişini test etmek
+- **Nerede?**: Login ekranı, UserController, JWT token üretimi
+- **Nasıl?**: Doğru bilgilerle girişte admin paneline yönlendirme, yanlışta hata mesajı
 
-```mermaid
-graph TD
-  A[React + MUI Frontend] -- HTTP/REST --> B[.NET Core API]
-  B -- EF Core --> C[(PostgreSQL)]
-  B -- Loglama --> D[Serilog]
-  B -- Kimlik Doğrulama --> E[Cookie Auth]
-  B -- Bildirimler --> F[Notification Table]
-```
+## 2. Mağaza Kullanıcı Girişi
+- **Amaç:** Mağaza kullanıcısının sadece kendi paneline erişimini test etmek
+- **Nerede?**: Login ekranı, StoreController, rol kontrolü
+- **Nasıl?**: Mağaza email/şifre ile giriş, sadece kendi mağaza dashboard'u açılır
 
----
+## 3. Mağaza Ekleme
+- **Amaç:** Admin'in yeni mağaza ekleyebilmesini test etmek
+- **Nerede?**: Admin paneli, StoreController, Store entity
+- **Nasıl?**: Form doldurulup kaydedildiğinde mağaza listesine eklenir
 
-## 2. Temel Test Senaryoları
+## 4. Mağaza Bilgisi Güncelleme
+- **Amaç:** Admin'in mağaza bilgilerini güncelleyebilmesini test etmek
+- **Nerede?**: Admin paneli, StoreController
+- **Nasıl?**: Bilgiler güncellenip kaydedildiğinde değişiklikler yansır
 
-### 2.1 Admin Girişi
+## 5. Mağaza Silme
+- **Amaç:** Admin'in mağaza silebilmesini test etmek
+- **Nerede?**: Admin paneli, StoreController
+- **Nasıl?**: Silinen mağaza ve kullanıcıya erişim engellenir, log kaydı oluşur
 
-- **Amaç:** Admin kullanıcısının sisteme güvenli girişini doğrulamak
-- **Adımlar:**
-  1. Giriş ekranına admin email ve şifresi girilir.
-  2. "Giriş Yap" butonuna tıklanır.
-- **Beklenen Sonuç:**
-  - Admin paneline yönlendirilir.
-  - Yanlış bilgilerde "Hatalı giriş" uyarısı çıkar.
+## 6. Kullanıcı Yönetimi
+- **Amaç:** Kullanıcı ekleme, düzenleme, silme işlemlerini test etmek
+- **Nerede?**: Kullanıcı yönetimi sayfası, UserController
+- **Nasıl?**: Her işlem sonrası kullanıcı listesi güncellenir, bildirim/log oluşur
 
----
-
-### 2.2 Mağaza Kullanıcı Girişi
-
-- **Amaç:** Mağaza kullanıcısının sadece kendi paneline girişini doğrulamak
-- **Adımlar:**
-  1. Giriş ekranında "User" seçilir.
-  2. Mağaza email ve şifresi girilir.
-  3. "Giriş Yap" butonuna tıklanır.
-- **Beklenen Sonuç:**
-  - Sadece ilgili mağazanın dashboard'u açılır.
-  - Diğer mağazaların verileri görüntülenemez.
-
----
-
-### 2.3 Mağaza Ekleme (Admin)
-
-- **Amaç:** Adminin yeni mağaza ekleyebilmesini test etmek
-- **Adımlar:**
-  1. Admin panelde "Yeni Mağaza Ekle" butonuna tıklanır.
-  2. Mağaza bilgileri girilir (ad, adres, email, şifre, telefon, durum).
-  3. "Kaydet" butonuna basılır.
-- **Beklenen Sonuç:**
-  - Mağaza listesine yeni mağaza eklenir.
-  - Mağaza için giriş bilgisi atanır.
-  - Şifre sadece oluşturulurken gösterilir, veritabanında hash'li saklanır.
-
----
-
-### 2.4 Mağaza Bilgisi Güncelleme
-
-- **Amaç:** Adminin mağaza bilgilerini güncelleyebilmesini test etmek
-- **Adımlar:**
-  1. Mağaza listesinde "Düzenle" butonuna tıklanır.
-  2. Bilgiler güncellenir.
-  3. "Kaydet" butonuna basılır.
-- **Beklenen Sonuç:**
-  - Mağaza bilgileri güncellenir.
-  - Şifre güncellenirse hash'lenir, eski şifre gösterilmez.
-
----
-
-### 2.5 Mağaza Silme
-
-- **Amaç:** Adminin mağaza silebilmesini test etmek
-- **Adımlar:**
-  1. Mağaza listesinde "Sil" butonuna tıklanır.
-  2. Silme işlemi onaylanır.
-- **Beklenen Sonuç:**
-  - Mağaza ve ilişkili kullanıcı silinir.
-  - Silinen mağazanın kullanıcı girişi engellenir.
-  - Bildirim/log kaydı oluşur.
-
----
-
-### 2.6 Kullanıcı Yönetimi (Ekleme, Güncelleme, Silme)
-
-- **Amaç:** Adminin kullanıcı ekleme, düzenleme ve silme işlemlerini test etmek
-- **Adımlar:**
-  1. "Kullanıcı Yönetimi" bölümüne girilir.
-  2. "Yeni Kullanıcı" ile ekleme, "Düzenle" ile güncelleme, "Sil" ile silme işlemleri yapılır.
-- **Beklenen Sonuç:**
-  - Kullanıcı listesi güncellenir.
-  - Her işlem sonrası bildirim/log oluşur.
-
----
-
-### 2.7 Yetkisiz Erişim Kontrolü
-
+## 7. Yetkisiz Erişim Kontrolü
 - **Amaç:** Yetkisiz kullanıcıların admin işlemlerine erişimini engellemek
-- **Adımlar:**
-  1. Mağaza kullanıcısı ile giriş yapılır.
-  2. Admin paneline erişmeye çalışılır.
-- **Beklenen Sonuç:**
-  - "403 Forbidden" hatası döner, erişim engellenir.
+- **Nerede?**: API endpoint'lerinde rol kontrolü
+- **Nasıl?**: Yetkisiz erişimde 403 Forbidden hatası döner
 
----
+## 8. Bildirim Sistemi
+- **Amaç:** Önemli işlemler sonrası bildirimlerin oluştuğunu test etmek
+- **Nerede?**: NotificationController, frontend snackbar
+- **Nasıl?**: İşlem sonrası anlık ve kalıcı bildirim oluşur
 
-### 2.8 Bildirim Sistemi
+## 9. Raporlama ve İstatistikler
+- **Amaç:** Raporların ve istatistiklerin doğru gösterilmesini test etmek
+- **Nerede?**: DashboardPage, StoreDetailPage, ReportController
+- **Nasıl?**: API'den alınan veriler doğru şekilde görselleştirilir
 
-- **Amaç:** Önemli işlemler sonrası bildirimlerin ve logların oluştuğunu doğrulamak
-- **Adımlar:**
-  1. Mağaza/kullanıcı ekle, sil, güncelle işlemleri yapılır.
-- **Beklenen Sonuç:**
-  - Anlık (toast/snackbar) ve kalıcı (veritabanı) bildirimler oluşur.
-  - Bildirimler admin panelde listelenir.
+## 10. Performans ve Güvenlik
+- **Amaç:** Temel işlemlerin hızlı ve güvenli tamamlandığını test etmek
+- **Nerede?**: Backend async işlemler, JWT, BCrypt
+- **Nasıl?**: Her işlem 5 saniyeden kısa sürer, şifreler hash'li saklanır
 
----
-
-### 2.9 Raporlama ve İstatistikler
-
-- **Amaç:** Özet raporların ve istatistiklerin doğru gösterilmesini test etmek
-- **Adımlar:**
-  1. Admin panelde "Raporlar/İstatistikler" sekmesine girilir.
-- **Beklenen Sonuç:**
-  - Toplam satış, kullanıcı, mağaza, envanter gibi veriler doğru gösterilir.
-
----
-
-### 2.10 Performans ve Güvenlik
-
-- **Amaç:** Temel işlemlerin hızlı ve güvenli şekilde tamamlandığını doğrulamak
-- **Adımlar:**
-  1. Listeleme, ekleme, silme, güncelleme işlemleri yapılır.
-  2. Şifrelerin veritabanında hash'li saklandığı kontrol edilir.
-- **Beklenen Sonuç:**
-  - Her işlem 5 saniyeden kısa sürede tamamlanır.
-  - Şifreler hash'li olarak saklanır, açık şifre görünmez.
-
----
-
-### 2.11 Tarayıcı Uyumluluğu
-
+## 11. Tarayıcı Uyumluluğu
 - **Amaç:** Uygulamanın modern tarayıcılarda sorunsuz çalıştığını test etmek
-- **Adımlar:**
-  1. Chrome, Firefox, Edge ile uygulama açılır.
-- **Beklenen Sonuç:**
-  - Tüm temel fonksiyonlar sorunsuz çalışır.
-  - Internet Explorer desteklenmez.
+- **Nerede?**: Frontend responsive tasarım, MUI
+- **Nasıl?**: Chrome, Firefox, Edge'de tüm fonksiyonlar çalışır
+
+## 12. Yedekleme ve Loglama
+- **Amaç:** Sistem loglarının ve veritabanı yedeklerinin tutulduğunu test etmek
+- **Nerede?**: Serilog, veritabanı backup
+- **Nasıl?**: Log ve yedek dosyaları düzenli oluşur
 
 ---
 
-### 2.12 Yedekleme ve Loglama
-
-- **Amaç:** Sistem loglarının ve veritabanı yedeklerinin tutulduğunu doğrulamak
-- **Adımlar:**
-  1. Log dosyaları ve yedekler kontrol edilir.
-- **Beklenen Sonuç:**
-  - Loglar ve yedekler düzenli olarak oluşturulmuş olur.
-
----
-
-> **Not:** Her test senaryosu, sistemin hem fonksiyonel hem de güvenlik, performans ve bakım gereksinimlerini karşıladığını doğrulamak için hazırlanmıştır. Gerektikçe yeni senaryolar eklenebilir veya mevcutlar detaylandırılabilir.
+**Not:** Her test, sistemin hem fonksiyonel hem de güvenlik, performans ve bakım gereksinimlerini karşıladığını doğrular. Detaylar için kod ve API dokümantasyonuna bakınız.
