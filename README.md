@@ -1,82 +1,125 @@
-cat > README.md << 'EOF'
 # LCW Data Aggregate Project
 
-❓❓ Proje Açıklaması
+## 🚀 Proje Özeti
 
-Client-Side Data Aggregate sistemi - Mağazalardan veri toplayan, işleyen ve görselleştiren kapsamlı bir sistem.
+LC Waikiki mağazalarının satış, stok, kullanıcı ve mağaza yönetimini merkezi ve güvenli şekilde yöneten, modern web teknolojileriyle geliştirilmiş bir veri toplama ve yönetim sistemidir. Hem mağaza yöneticileri hem de adminler için dinamik dashboard ve detaylı raporlama sunar.
 
-⭐⭐ Teknoloji Stack'i
+---
 
-### Backend
-- **.NET 9** - Web API
-- **Entity Framework Core** - ORM
-- **PostgreSQL** - Ana veritabanı
-- **MongoDB** - Loglama
-- **Redis** - Cache
-- **OpenId Connect** - Authentication
+## 🏗️ Kullanılan Teknolojiler
 
-### Frontend
-- **React** - UI Framework
-- **TypeScript** - Type Safety
-- **Material-UI/Ant Design** - UI Components
-- **Chart.js/Recharts** - Grafikler
+| Katman    | Teknoloji                | Nerede & Neden Kullanıldı? |
+|-----------|-------------------------|----------------------------|
+| Backend   | **.NET Core 9.0**       | API geliştirme, yüksek performans, cross-platform destek |
+|           | **Entity Framework Core 9.0.7** | ORM, migration, LINQ ile kolay veri erişimi |
+|           | **SQLite**              | Hafif, serverless veritabanı, kolay kurulum |
+|           | **BCrypt.Net-Next**     | Şifrelerin güvenli şekilde hash’lenmesi |
+|           | **Serilog**             | Yapılandırılmış loglama ve hata takibi |
+|           | **Repository Pattern**  | Veri erişim soyutlaması, test edilebilirlik |
+|           | **JWT Authentication**  | Token tabanlı kimlik doğrulama ve rol yönetimi |
+| Frontend  | **React 19.1.0**        | Modern, component tabanlı kullanıcı arayüzü |
+|           | **TypeScript 4.9.5**    | Tip güvenliği, daha sağlam kod |
+|           | **Material-UI (MUI) 7.2.0** | Hazır ve özelleştirilebilir UI bileşenleri, responsive tasarım |
+|           | **React Router DOM 6.28.0** | SPA yönlendirme ve sayfa yönetimi |
+|           | **Jest**                | Frontend birim testleri |
+| DevOps    | **Git & GitHub**        | Sürüm kontrolü, işbirliği, CI/CD |
+|           | **npm & NuGet**         | Paket yönetimi |
 
-### DevOps
-- **Docker** - Containerization
-- **GitHub Actions** - CI/CD
-- **Elasticsearch** - Log Analytics (Opsiyonel)
-- **Kibana** - Monitoring (Opsiyonel)
+---
 
-🚀🚀 Kurulum
+## 📦 Proje Klasör Yapısı
+
+```
+LCW-Project/
+├── backend/LCDataViev.API/   # .NET Core Web API ve veri katmanı
+├── frontend/lcw-frontend/    # Mağaza yönetim arayüzü (React)
+├── frontend/lcw-admin-frontend/ # Admin paneli (React)
+├── docs/                     # Gereksinimler, testler, teknoloji dokümantasyonu
+```
+
+---
+
+## ⚙️ Kurulum & Çalıştırma
 
 ### Gereksinimler
 - .NET 9 SDK
 - Node.js 18+
-- PostgreSQL
-- Redis
-- MongoDB
 
 ### Backend Kurulumu
 ```bash
 cd backend/LCDataViev.API
-dotnet restore
-dotnet run
+# Bağımlılıkları yükle
+ dotnet restore
+# Uygulamayı başlat
+ dotnet run
 ```
 
 ### Frontend Kurulumu
 ```bash
-cd frontend
+cd frontend/lcw-frontend
 npm install
 npm start
 ```
 
-👀👀 API Endpoints
+Admin paneli için:
+```bash
+cd frontend/lcw-admin-frontend
+npm install
+npm start
+```
 
-### V1 Özellikleri
-- `/api/satis` - Satış işlemleri
-- `/api/iade` - İade işlemleri
-- `/api/stok` - Stok işlemleri
-- `/api/dashboard` - Dashboard verileri
+---
 
- 📈📈 Dashboard Özellikleri
+## 🔑 Temel Özellikler
+- Mağaza ve kullanıcı yönetimi (ekle, düzenle, sil)
+- Satış, stok, iade işlemleri
+- Gerçek zamanlı dashboard ve istatistikler
+- JWT ile güvenli kimlik doğrulama
+- Responsive ve modern kullanıcı arayüzü
+- Bildirim ve loglama sistemi
 
-- **V1:** Aktif Mağaza Sayısı
-- **V2:** Anlık Toplam Stok, İade, Satış
-- **V3:** Mağaza bazlı veriler
-- **V4:** Son 1 haftalık kümülatif toplamlar
+---
 
-👊👊 Katkıda Bulunma
+## 📡 API Endpoint Örnekleri
+
+| Endpoint                        | Açıklama                  |
+|---------------------------------|---------------------------|
+| `GET /api/stores`               | Tüm mağazaları listeler   |
+| `POST /api/stores`              | Yeni mağaza ekler         |
+| `GET /api/products/store/{id}`  | Mağazanın ürünlerini getir|
+| `GET /api/employees/store/{id}` | Mağazanın çalışanlarını getir|
+| `POST /api/auth/login`          | Kullanıcı girişi (JWT)    |
+
+Daha fazla detay için: [`docs/`](./docs/) klasörüne bakınız.
+
+---
+
+## 🖼️ Ekran Görüntüleri
+
+> (Buraya projenin ana dashboard veya mağaza detay sayfası görselini ekleyebilirsiniz)
+
+---
+
+## 🤝 Katkıda Bulunma
 
 1. Fork yapın
-2. Feature branch oluşturun (`git checkout -b feature/amazing-feature`)
-3. Commit yapın (`git commit -m 'Add amazing feature'`)
-4. Push yapın (`git push origin feature/amazing-feature`)
+2. Yeni bir branch oluşturun (`git checkout -b feature/ozellik-adi`)
+3. Değişikliklerinizi commit'leyin (`git commit -m 'feat: açıklama'`)
+4. Branch'i push'layın (`git push origin feature/ozellik-adi`)
 5. Pull Request oluşturun
 
-📄📄 Lisans
+---
 
-Bu proje MIT lisansı altında lisanslanmıştır.
+## 📄 Lisans
 
-🎉🎉 Geliştirici
+Bu proje MIT lisansı ile lisanslanmıştır.
 
-Gökdeniz Ayrılmış
+---
+
+## 👨‍💻 Geliştirici
+
+[Gökdeniz Ayrılmış](https://github.com/gokdenizayrilmis)
+
+---
+
+> **Not:** Proje ve teknolojiler hakkında detaylı açıklamalar için [`docs/tech-stack.md`](./docs/tech-stack.md) dosyasına göz atabilirsiniz.
