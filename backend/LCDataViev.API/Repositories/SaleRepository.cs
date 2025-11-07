@@ -13,6 +13,16 @@ namespace LCDataViev.API.Repositories
             return await _dbSet.Where(s => s.StoreId == storeId).ToListAsync();
         }
 
+        public async Task<IEnumerable<Sale>> GetSalesByStoreAsync(int storeId)
+        {
+            return await _dbSet
+                .Include(s => s.Store)
+                .Include(s => s.Product)
+                .Include(s => s.User)
+                .Where(s => s.StoreId == storeId)
+                .ToListAsync();
+        }
+
         public async Task<IEnumerable<Sale>> GetSalesByUserIdAsync(int userId)
         {
             return await _dbSet.Where(s => s.UserId == userId).ToListAsync();

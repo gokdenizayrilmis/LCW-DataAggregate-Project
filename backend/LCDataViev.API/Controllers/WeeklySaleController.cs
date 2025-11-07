@@ -4,6 +4,7 @@ using LCDataViev.API.Models.DTOs;
 using LCDataViev.API.Repositories;
 using LCDataViev.API.Models.Utilities;
 using LCDataViev.API.Data;
+using Microsoft.AspNetCore.Authorization;
 
 namespace LCDataViev.API.Controllers
 {
@@ -147,8 +148,19 @@ namespace LCDataViev.API.Controllers
 
         // POST: api/WeeklySale
         [HttpPost]
+        [Authorize(Roles = "user")]
         public async Task<ActionResult<WeeklySale>> CreateWeeklySale(CreateWeeklySaleDto createDto)
         {
+            // Token'daki store ile eşleşme
+            var storeIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "storeId")?.Value;
+            if (!int.TryParse(storeIdClaim, out var userStoreId) || userStoreId <= 0)
+            {
+                return Forbid();
+            }
+            if (createDto.StoreId != userStoreId)
+            {
+                return Forbid();
+            }
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -254,8 +266,19 @@ namespace LCDataViev.API.Controllers
 
         // PUT: api/WeeklySale/5
         [HttpPut("{id}")]
+        [Authorize(Roles = "user")]
         public async Task<IActionResult> UpdateWeeklySale(int id, UpdateWeeklySaleDto updateDto)
         {
+            // Token'daki store ile eşleşme
+            var storeIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "storeId")?.Value;
+            if (!int.TryParse(storeIdClaim, out var userStoreId) || userStoreId <= 0)
+            {
+                return Forbid();
+            }
+            if (existingWeeklySale.StoreId != userStoreId)
+            {
+                return Forbid();
+            }
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -293,12 +316,24 @@ namespace LCDataViev.API.Controllers
 
         // DELETE: api/WeeklySale/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "user")]
         public async Task<IActionResult> DeleteWeeklySale(int id)
         {
             var weeklySale = await _weeklySaleRepository.GetByIdAsync(id);
             if (weeklySale == null)
             {
                 return NotFound();
+            }
+
+            // Token'daki store ile eşleşme
+            var storeIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "storeId")?.Value;
+            if (!int.TryParse(storeIdClaim, out var userStoreId) || userStoreId <= 0)
+            {
+                return Forbid();
+            }
+            if (weeklySale.StoreId != userStoreId)
+            {
+                return Forbid();
             }
 
             weeklySale.IsActive = false;

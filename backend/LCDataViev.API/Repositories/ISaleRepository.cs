@@ -6,6 +6,7 @@ namespace LCDataViev.API.Repositories
     {
         // Sale-specific operations
         Task<IEnumerable<Sale>> GetSalesByStoreIdAsync(int storeId);
+        Task<IEnumerable<Sale>> GetSalesByStoreAsync(int storeId);
         Task<IEnumerable<Sale>> GetSalesByUserIdAsync(int userId);
         Task<Sale?> GetSaleWithDetailsAsync(int id);
         Task<int> GetSaleCountByStoreIdAsync(int storeId);

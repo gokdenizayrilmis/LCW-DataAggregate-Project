@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using LCDataViev.API.Models.Entities;
 using LCDataViev.API.Repositories;
+using Microsoft.AspNetCore.Authorization;
 
 namespace LCDataViev.API.Controllers
 {
@@ -48,10 +49,20 @@ namespace LCDataViev.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "user")]
         public async Task<ActionResult<Return>> Create(Return returnItem)
         {
             try
             {
+                var storeIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "storeId")?.Value;
+                if (!int.TryParse(storeIdClaim, out var userStoreId) || userStoreId <= 0)
+                {
+                    return Forbid();
+                }
+                if (returnItem.StoreId != userStoreId)
+                {
+                    return Forbid();
+                }
                 await _returnRepository.AddAsync(returnItem);
                 return CreatedAtAction(nameof(GetById), new { id = returnItem.Id }, returnItem);
             }
@@ -62,6 +73,7 @@ namespace LCDataViev.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "user")]
         public async Task<IActionResult> Update(int id, Return returnItem)
         {
             if (id != returnItem.Id)
@@ -71,6 +83,15 @@ namespace LCDataViev.API.Controllers
 
             try
             {
+                var storeIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "storeId")?.Value;
+                if (!int.TryParse(storeIdClaim, out var userStoreId) || userStoreId <= 0)
+                {
+                    return Forbid();
+                }
+                if (returnItem.StoreId != userStoreId)
+                {
+                    return Forbid();
+                }
                 await _returnRepository.UpdateAsync(returnItem);
                 return NoContent();
             }
@@ -81,6 +102,7 @@ namespace LCDataViev.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "user")]
         public async Task<IActionResult> Delete(int id)
         {
             try
@@ -89,6 +111,16 @@ namespace LCDataViev.API.Controllers
                 if (returnItem == null)
                 {
                     return NotFound();
+                }
+
+                var storeIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "storeId")?.Value;
+                if (!int.TryParse(storeIdClaim, out var userStoreId) || userStoreId <= 0)
+                {
+                    return Forbid();
+                }
+                if (returnItem.StoreId != userStoreId)
+                {
+                    return Forbid();
                 }
 
                 await _returnRepository.DeleteAsync(returnItem);

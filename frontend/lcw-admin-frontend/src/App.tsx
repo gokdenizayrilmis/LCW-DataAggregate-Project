@@ -4,17 +4,20 @@ import AdminLoginPage from './pages/AdminLoginPage';
 import AdminDashboard from './pages/AdminDashboard';
 import StoreListPage from './pages/StoreListPage';
 import StoreDetailPage from './pages/StoreDetailPage';
+import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<AdminLoginPage />} />
-        <Route path="/dashboard" element={<AdminDashboard />} />
-        <Route path="/stores" element={<StoreListPage />} />
-        <Route path="/store/:storeId" element={<StoreDetailPage />} />
-      </Routes>
-    </Router>
+    <ErrorBoundary>
+      <Router>
+        <Routes>
+          <Route path="/" element={<AdminLoginPage />} />
+          <Route path="/dashboard" element={<AdminDashboard />} />
+          <Route path="/stores" element={<StoreListPage />} />
+          <Route path="/store/:storeId" element={<StoreDetailPage />} />
+        </Routes>
+      </Router>
+    </ErrorBoundary>
   );
 }
 

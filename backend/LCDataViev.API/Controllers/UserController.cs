@@ -167,7 +167,7 @@ namespace LCDataViev.API.Controllers
             if (string.IsNullOrEmpty(user.PasswordHash))
                 return Unauthorized("Şifre hatalı.");
 
-            _logger.LogInformation($"Login attempt for email: {dto.Email}, Password: {dto.Password}, Stored Hash: {user.PasswordHash}");
+            _logger.LogInformation($"Login attempt for email: {dto.Email}");
             
             bool isPasswordValid = BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash);
             _logger.LogInformation($"Password verification result: {isPasswordValid}");

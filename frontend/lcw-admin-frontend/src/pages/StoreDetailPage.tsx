@@ -153,8 +153,7 @@ const StoreDetailPage: React.FC = () => {
   const [tabValue, setTabValue] = useState(0);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [openProductModal, setOpenProductModal] = useState(false);
-  const [openEmployeeDialog, setOpenEmployeeDialog] = useState(false);
-  const [openProductDialog, setOpenProductDialog] = useState(false);
+  // ADB: İçerik read-only, ekleme/düzenleme dialogları kaldırıldı
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   const [employees, setEmployees] = useState<Employee[]>([]);
 
@@ -220,144 +219,20 @@ const StoreDetailPage: React.FC = () => {
     setSelectedProduct(null);
   };
 
-  const handleEditEmployee = (employee: Employee) => {
-    setEditingEmployee(employee);
-  };
+  // ADB: read-only, düzenleme devre dışı
+  const handleEditEmployee = (_employee: Employee) => {};
 
-  const handleSaveEmployee = async (updatedEmployee: Employee) => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5283/api/Employee/${updatedEmployee.id}`, {
-        method: 'PUT',
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(updatedEmployee)
-      });
+  const handleSaveEmployee = async (_updatedEmployee: Employee) => {};
 
-      if (response.ok) {
-        setEmployees(prev => prev.map(emp => 
-          emp.id === updatedEmployee.id ? updatedEmployee : emp
-        ));
-        setEditingEmployee(null);
-      } else {
-        console.error('Çalışan güncellenirken hata oluştu');
-      }
-    } catch (error) {
-      console.error('Çalışan güncellenirken hata:', error);
-    }
-  };
+  const handleCancelEdit = () => {};
 
-  const handleCancelEdit = () => {
-    setEditingEmployee(null);
-  };
+  const handleAddEmployee = () => {};
 
-  const handleAddEmployee = () => {
-    setEmployeeForm({ name: '', surname: '', position: '', salary: '', email: '', phone: '' });
-    setOpenEmployeeDialog(true);
-  };
+  const handleSaveNewEmployee = async () => {};
 
-  const handleSaveNewEmployee = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const payload = {
-        name: employeeForm.name,
-        surname: employeeForm.surname,
-        position: employeeForm.position,
-        salary: parseFloat(employeeForm.salary),
-        hireDate: new Date().toISOString(),
-        email: employeeForm.email,
-        phone: employeeForm.phone,
-        avatar: '',
-        storeId: parseInt(storeId || '0'),
-        isActive: true
-      };
-      const response = await fetch('http://localhost:5283/api/Employee', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      });
-      if (response.ok) {
-        // refresh employees
-        const headers = { 'Authorization': `Bearer ${token}` } as any;
-        const employeesResponse = await fetch(`http://localhost:5283/api/Employee/store/${storeId}`, { headers });
-        if (employeesResponse.ok) {
-          const employeesData = await employeesResponse.json();
-          setEmployees(employeesData);
-        }
-        setOpenEmployeeDialog(false);
-      }
-    } catch (e) {
-      console.error('Yeni çalışan eklenemedi:', e);
-    }
-  };
+  const handleAddProduct = () => {};
 
-  const handleAddProduct = () => {
-    setProductForm({ name: '', code: '', category: '', price: '', description: '', stockQuantity: '' });
-    setProductImageFile(null);
-    setProductImagePreview('');
-    setOpenProductDialog(true);
-  };
-
-  const handleSaveNewProduct = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      let imageUrl = '';
-
-      // Upload image first if selected
-      if (productImageFile) {
-        const formData = new FormData();
-        formData.append('file', productImageFile);
-        formData.append('storeId', String(parseInt(storeId || '0')));
-        formData.append('category', productForm.category || 'Genel');
-        const uploadRes = await fetch('http://localhost:5283/api/uploads/product-image', {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${token}` },
-          body: formData
-        });
-        if (uploadRes.ok) {
-          const data = await uploadRes.json();
-          imageUrl = data.imageUrl;
-        }
-      }
-
-      const payload = {
-        name: productForm.name,
-        code: productForm.code,
-        category: productForm.category,
-        price: parseFloat(productForm.price),
-        imageUrl: imageUrl || `/images/products/${(productForm.category || 'genel').toLowerCase()}/default.jpg`,
-        description: productForm.description,
-        stockQuantity: parseInt(productForm.stockQuantity),
-        storeId: parseInt(storeId || '0'),
-        isActive: true
-      };
-      const response = await fetch('http://localhost:5283/api/Product', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      });
-      if (response.ok) {
-        // refresh products
-        const headers = { 'Authorization': `Bearer ${token}` } as any;
-        const productsResponse = await fetch(`http://localhost:5283/api/Product/store/${storeId}`, { headers });
-        if (productsResponse.ok) {
-          const productsData = await productsResponse.json();
-          setProducts(productsData);
-        }
-        setOpenProductDialog(false);
-      }
-    } catch (e) {
-      console.error('Yeni ürün eklenemedi:', e);
-    }
-  };
+  const handleSaveNewProduct = async () => {};
 
   const handleDeleteEmployee = async (employeeId: number) => {
     try {
@@ -508,8 +383,6 @@ const StoreDetailPage: React.FC = () => {
     );
   }
 
-     // Debug bilgileri
-   console.log('Current state - products:', products.length, 'employees:', employees.length, 'weeklyReport:', weeklyReport.length, 'weeklySales:', weeklySales.length);
 
   return (
     <Box sx={{ 
@@ -520,10 +393,6 @@ const StoreDetailPage: React.FC = () => {
     }}>
       <AdminNavbar />
       <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 8, mb: 5 }}>
-        {/* Debug bilgisi */}
-                 <Alert severity="info" sx={{ mb: 2 }}>
-           Debug: {products.length} ürün, {employees.length} çalışan, {weeklySales.length} haftalık satış yüklendi
-         </Alert>
         {/* Mağaza Başlığı */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
           <Box>
@@ -707,7 +576,6 @@ const StoreDetailPage: React.FC = () => {
           <TabPanel value={tabValue} index={1}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="h6">Stok Durumu</Typography>
-              <Button variant="contained" onClick={handleAddProduct}>Yeni Ürün Ekle</Button>
             </Box>
             <TableContainer component={Paper}>
               <Table>
@@ -747,18 +615,15 @@ const StoreDetailPage: React.FC = () => {
                           />
                         </TableCell>
                         <TableCell>{product.lastUpdated}</TableCell>
-                                                 <TableCell>
-                           <IconButton 
-                             size="small" 
-                             color="primary"
-                             onClick={() => handleProductView(product)}
-                           >
-                             <Visibility />
-                           </IconButton>
-                           <IconButton size="small" color="secondary">
-                             <Edit />
-                           </IconButton>
-                         </TableCell>
+                        <TableCell>
+                          <IconButton 
+                            size="small" 
+                            color="primary"
+                            onClick={() => handleProductView(product)}
+                          >
+                            <Visibility />
+                          </IconButton>
+                        </TableCell>
                       </TableRow>
                     );
                   })}
@@ -770,7 +635,6 @@ const StoreDetailPage: React.FC = () => {
           <TabPanel value={tabValue} index={2}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="h6">Ürünler</Typography>
-              <Button variant="contained" onClick={handleAddProduct}>Yeni Ürün Ekle</Button>
             </Box>
                          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 3 }}>
                {products.map((product) => (
@@ -821,7 +685,6 @@ const StoreDetailPage: React.FC = () => {
           <TabPanel value={tabValue} index={3}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="h6">Çalışanlar</Typography>
-              <Button variant="contained" onClick={handleAddEmployee}>Yeni Çalışan Ekle</Button>
             </Box>
             <TableContainer component={Paper}>
               <Table>
@@ -855,70 +718,26 @@ const StoreDetailPage: React.FC = () => {
                         </Box>
                       </TableCell>
                                              <TableCell>
-                         {editingEmployee?.id === employee.id ? (
-                           <input
-                             value={editingEmployee.position}
-                             onChange={(e) => setEditingEmployee(prev => prev ? {...prev, position: e.target.value} : null)}
-                             style={{ padding: '4px 8px', border: '1px solid #ccc', borderRadius: '4px' }}
-                           />
-                         ) : (
-                           <Chip 
-                             label={employee.position} 
-                             color={
-                               employee.position.includes('Müdür') ? 'error' :
-                               employee.position.includes('Sorumlusu') ? 'warning' : 'default'
-                             }
-                             size="small"
-                           />
-                         )}
+                         <Chip 
+                           label={employee.position} 
+                           color={
+                             employee.position.includes('Müdür') ? 'error' :
+                             employee.position.includes('Sorumlusu') ? 'warning' : 'default'
+                           }
+                           size="small"
+                         />
                        </TableCell>
                        <TableCell>
-                         {editingEmployee?.id === employee.id ? (
-                           <input
-                             type="number"
-                             value={editingEmployee.salary}
-                             onChange={(e) => setEditingEmployee(prev => prev ? {...prev, salary: parseInt(e.target.value) || 0} : null)}
-                             style={{ padding: '4px 8px', border: '1px solid #ccc', borderRadius: '4px', width: '80px' }}
-                           />
-                         ) : (
-                           employee.salary.toLocaleString() + '₺'
-                         )}
+                         {employee.salary.toLocaleString() + '₺'}
                        </TableCell>
                        <TableCell>{getWorkDuration(employee.hireDate)}</TableCell>
                        <TableCell>
-                         {editingEmployee?.id === employee.id ? (
-                           <input
-                             value={editingEmployee.phone}
-                             onChange={(e) => setEditingEmployee(prev => prev ? {...prev, phone: e.target.value} : null)}
-                             style={{ padding: '4px 8px', border: '1px solid #ccc', borderRadius: '4px' }}
-                           />
-                         ) : (
-                           employee.phone
-                         )}
+                         {employee.phone}
                        </TableCell>
                                                <TableCell>
-                          {editingEmployee?.id === employee.id ? (
-                            <>
-                              <IconButton size="small" color="success" onClick={() => handleSaveEmployee(editingEmployee)}>
-                                <Edit />
-                              </IconButton>
-                              <IconButton size="small" color="error" onClick={handleCancelEdit}>
-                                <Delete />
-                              </IconButton>
-                            </>
-                          ) : (
-                            <>
-                              <IconButton size="small" color="primary">
-                                <Visibility />
-                              </IconButton>
-                              <IconButton size="small" color="secondary" onClick={() => handleEditEmployee(employee)}>
-                                <Edit />
-                              </IconButton>
-                              <IconButton size="small" color="error" onClick={() => handleDeleteEmployee(employee.id)}>
-                                <Delete />
-                              </IconButton>
-                            </>
-                          )}
+                          <IconButton size="small" color="primary">
+                            <Visibility />
+                          </IconButton>
                         </TableCell>
                     </TableRow>
                   ))}
@@ -1077,76 +896,7 @@ const StoreDetailPage: React.FC = () => {
          </DialogActions>
        </Dialog>
 
-      {/* Yeni Çalışan Ekle Dialog */}
-      <Dialog open={openEmployeeDialog} onClose={() => setOpenEmployeeDialog(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Yeni Çalışan Ekle</DialogTitle>
-        <DialogContent>
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2, mt: 1 }}>
-            <TextField label="Ad" value={employeeForm.name} onChange={(e) => setEmployeeForm({ ...employeeForm, name: e.target.value })} fullWidth />
-            <TextField label="Soyad" value={employeeForm.surname} onChange={(e) => setEmployeeForm({ ...employeeForm, surname: e.target.value })} fullWidth />
-            <TextField label="Pozisyon" value={employeeForm.position} onChange={(e) => setEmployeeForm({ ...employeeForm, position: e.target.value })} fullWidth />
-            <TextField label="Maaş" type="number" value={employeeForm.salary} onChange={(e) => setEmployeeForm({ ...employeeForm, salary: e.target.value })} fullWidth />
-            <TextField label="E-posta" type="email" value={employeeForm.email} onChange={(e) => setEmployeeForm({ ...employeeForm, email: e.target.value })} fullWidth />
-            <TextField label="Telefon" value={employeeForm.phone} onChange={(e) => setEmployeeForm({ ...employeeForm, phone: e.target.value })} fullWidth />
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenEmployeeDialog(false)}>İptal</Button>
-          <Button onClick={handleSaveNewEmployee} variant="contained">Ekle</Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Yeni Ürün Ekle Dialog */}
-      <Dialog open={openProductDialog} onClose={() => setOpenProductDialog(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Yeni Ürün Ekle</DialogTitle>
-        <DialogContent>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-            <TextField label="Ürün Adı" value={productForm.name} onChange={(e) => setProductForm({ ...productForm, name: e.target.value })} fullWidth />
-            <TextField label="Ürün Kodu" value={productForm.code} onChange={(e) => setProductForm({ ...productForm, code: e.target.value })} fullWidth />
-            <FormControl fullWidth>
-              <InputLabel>Kategori</InputLabel>
-              <Select value={productForm.category} label="Kategori" onChange={(e) => setProductForm({ ...productForm, category: e.target.value as string })}>
-                <MenuItem value="Tişört">Tişört</MenuItem>
-                <MenuItem value="Pantolon">Pantolon</MenuItem>
-                <MenuItem value="Ayakkabı">Ayakkabı</MenuItem>
-                <MenuItem value="Hırka">Hırka</MenuItem>
-                <MenuItem value="Gömlek">Gömlek</MenuItem>
-                <MenuItem value="Şort">Şort</MenuItem>
-              </Select>
-            </FormControl>
-            <TextField label="Fiyat" type="number" value={productForm.price} onChange={(e) => setProductForm({ ...productForm, price: e.target.value })} fullWidth />
-            <TextField label="Açıklama" value={productForm.description} onChange={(e) => setProductForm({ ...productForm, description: e.target.value })} fullWidth multiline rows={3} />
-            <TextField label="Stok Miktarı" type="number" value={productForm.stockQuantity} onChange={(e) => setProductForm({ ...productForm, stockQuantity: e.target.value })} fullWidth />
-            <Box>
-              <Typography variant="subtitle2" sx={{ mb: 1 }}>Ürün Görseli</Typography>
-              {productImagePreview && (
-                <Box sx={{ mb: 1 }}>
-                  <img src={productImagePreview} alt="Önizleme" style={{ maxWidth: '100%', maxHeight: 200, objectFit: 'contain', border: '1px solid #eee', borderRadius: 8 }} />
-                </Box>
-              )}
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0] || null;
-                  setProductImageFile(file);
-                  if (file) {
-                    const reader = new FileReader();
-                    reader.onload = () => setProductImagePreview(reader.result as string);
-                    reader.readAsDataURL(file);
-                  } else {
-                    setProductImagePreview('');
-                  }
-                }}
-              />
-            </Box>
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenProductDialog(false)}>İptal</Button>
-          <Button onClick={handleSaveNewProduct} variant="contained">Ekle</Button>
-        </DialogActions>
-      </Dialog>
+      {/* ADB: İçerik CRUD dialogları kaldırıldı */}
      </Box>
    );
  };

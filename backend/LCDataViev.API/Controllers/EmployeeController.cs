@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using LCDataViev.API.Data;
 using LCDataViev.API.Models.Entities;
+using Microsoft.AspNetCore.Authorization;
 
 namespace LCDataViev.API.Controllers
 {
@@ -54,11 +55,31 @@ namespace LCDataViev.API.Controllers
 
         // POST: api/Employee
         [HttpPost]
+        [Authorize(Roles = "user")]
         public async Task<ActionResult<Employee>> CreateEmployee(Employee employee)
         {
-            if (!ModelState.IsValid)
+            // Token'dan mağaza kimliğini al
+            var storeIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "storeId")?.Value;
+            if (!int.TryParse(storeIdClaim, out var userStoreId) || userStoreId <= 0)
             {
-                return BadRequest(ModelState);
+                return Forbid();
+            }
+
+            // Tüm navigation properties'yi ignore et
+            ModelState.Clear();
+            
+            // Sadece gerekli field'ları validate et
+            if (string.IsNullOrEmpty(employee.Name))
+            {
+                return BadRequest("Ad gerekli");
+            }
+            if (string.IsNullOrEmpty(employee.Surname))
+            {
+                return BadRequest("Soyad gerekli");
+            }
+            if (string.IsNullOrEmpty(employee.Position))
+            {
+                return BadRequest("Pozisyon gerekli");
             }
 
             // Store'un var olup olmadığını kontrol et
@@ -66,6 +87,12 @@ namespace LCDataViev.API.Controllers
             if (store == null)
             {
                 return BadRequest("Geçersiz mağaza ID'si");
+            }
+
+            // Kullanıcının mağazası ile istek mağazası aynı olmalı
+            if (employee.StoreId != userStoreId)
+            {
+                return Forbid();
             }
 
             employee.CreatedAt = DateTime.UtcNow;
@@ -80,8 +107,16 @@ namespace LCDataViev.API.Controllers
 
         // PUT: api/Employee/5
         [HttpPut("{id}")]
+        [Authorize(Roles = "user")]
         public async Task<IActionResult> UpdateEmployee(int id, Employee employee)
         {
+            // Token'dan mağaza kimliğini al
+            var storeIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "storeId")?.Value;
+            if (!int.TryParse(storeIdClaim, out var userStoreId) || userStoreId <= 0)
+            {
+                return Forbid();
+            }
+
             if (id != employee.Id)
             {
                 return BadRequest();
@@ -98,6 +133,12 @@ namespace LCDataViev.API.Controllers
             if (store == null)
             {
                 return BadRequest("Geçersiz mağaza ID'si");
+            }
+
+            // Kullanıcının mağazası ile istek mağazası aynı olmalı
+            if (employee.StoreId != userStoreId)
+            {
+                return Forbid();
             }
 
             existingEmployee.Name = employee.Name;
@@ -132,12 +173,26 @@ namespace LCDataViev.API.Controllers
 
         // DELETE: api/Employee/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "user")]
         public async Task<IActionResult> DeleteEmployee(int id)
         {
+            // Token'dan mağaza kimliğini al
+            var storeIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "storeId")?.Value;
+            if (!int.TryParse(storeIdClaim, out var userStoreId) || userStoreId <= 0)
+            {
+                return Forbid();
+            }
+
             var employee = await _context.Employees.FindAsync(id);
             if (employee == null)
             {
                 return NotFound();
+            }
+
+            // Kullanıcının mağazası ile kaydın mağazası aynı olmalı
+            if (employee.StoreId != userStoreId)
+            {
+                return Forbid();
             }
 
             // Soft delete - sadece IsActive'i false yap
