@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using LCDataViev.API.Data;
 using LCDataViev.API.Models.Entities;
+using Microsoft.AspNetCore.Authorization;
 
 namespace LCDataViev.API.Controllers
 {
@@ -64,11 +65,35 @@ namespace LCDataViev.API.Controllers
 
         // POST: api/Product
         [HttpPost]
+        [Authorize(Roles = "user")]
         public async Task<ActionResult<Product>> CreateProduct(Product product)
         {
-            if (!ModelState.IsValid)
+            // Token'dan mağaza kimliğini al
+            var storeIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "storeId")?.Value;
+            if (!int.TryParse(storeIdClaim, out var userStoreId) || userStoreId <= 0)
             {
-                return BadRequest(ModelState);
+                return Forbid();
+            }
+
+            // Tüm navigation properties'yi ignore et
+            ModelState.Clear();
+            
+            // Sadece gerekli field'ları validate et
+            if (string.IsNullOrEmpty(product.Name))
+            {
+                return BadRequest("Ürün adı gerekli");
+            }
+            if (string.IsNullOrEmpty(product.Code))
+            {
+                return BadRequest("Ürün kodu gerekli");
+            }
+            if (string.IsNullOrEmpty(product.Category))
+            {
+                return BadRequest("Kategori gerekli");
+            }
+            if (product.Price <= 0)
+            {
+                return BadRequest("Geçerli bir fiyat girin");
             }
 
             // Store'un var olup olmadığını kontrol et
@@ -76,6 +101,12 @@ namespace LCDataViev.API.Controllers
             if (store == null)
             {
                 return BadRequest("Geçersiz mağaza ID'si");
+            }
+
+            // Kullanıcının mağazası ile istek mağazası aynı olmalı
+            if (product.StoreId != userStoreId)
+            {
+                return Forbid();
             }
 
             product.CreatedAt = DateTime.UtcNow;
@@ -90,8 +121,16 @@ namespace LCDataViev.API.Controllers
 
         // PUT: api/Product/5
         [HttpPut("{id}")]
+        [Authorize(Roles = "user")]
         public async Task<IActionResult> UpdateProduct(int id, Product product)
         {
+            // Token'dan mağaza kimliğini al
+            var storeIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "storeId")?.Value;
+            if (!int.TryParse(storeIdClaim, out var userStoreId) || userStoreId <= 0)
+            {
+                return Forbid();
+            }
+
             if (id != product.Id)
             {
                 return BadRequest();
@@ -108,6 +147,12 @@ namespace LCDataViev.API.Controllers
             if (store == null)
             {
                 return BadRequest("Geçersiz mağaza ID'si");
+            }
+
+            // Kullanıcının mağazası ile istek mağazası aynı olmalı
+            if (product.StoreId != userStoreId)
+            {
+                return Forbid();
             }
 
             existingProduct.Name = product.Name;
@@ -141,12 +186,26 @@ namespace LCDataViev.API.Controllers
 
         // DELETE: api/Product/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "user")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
+            // Token'dan mağaza kimliğini al
+            var storeIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "storeId")?.Value;
+            if (!int.TryParse(storeIdClaim, out var userStoreId) || userStoreId <= 0)
+            {
+                return Forbid();
+            }
+
             var product = await _context.Products.FindAsync(id);
             if (product == null)
             {
                 return NotFound();
+            }
+
+            // Kullanıcının mağazası ile kaydın mağazası aynı olmalı
+            if (product.StoreId != userStoreId)
+            {
+                return Forbid();
             }
 
             // Soft delete - sadece IsActive'i false yap

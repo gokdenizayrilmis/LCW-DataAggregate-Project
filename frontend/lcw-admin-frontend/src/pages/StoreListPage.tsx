@@ -29,6 +29,7 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   Visibility as VisibilityIcon,
+  VisibilityOff as VisibilityOffIcon,
   Search as SearchIcon,
   Store as StoreIcon,
   Phone as PhoneIcon,
@@ -81,7 +82,7 @@ const StoreListPage: React.FC = () => {
     isActive: true,
     isDomestic: true
   });
-  const [snackbar, setSnackbar] = useState<{ open: boolean, message: string, severity: 'success' | 'error' }>({
+  const [snackbar, setSnackbar] = useState<{ open: boolean, message: string, severity: 'success' | 'error' | 'info' | 'warning' }>({
     open: false,
     message: '',
     severity: 'success'
@@ -221,6 +222,159 @@ const StoreListPage: React.FC = () => {
     }
   };
 
+  const handleFixProductCodes = async () => {
+    if (!window.confirm('Ürün kodlarını düzeltmek istediğinizden emin misiniz?\n\nBu işlem yanlış formatlı ürün kodlarını (T07001 -> T1001) düzeltecektir.')) {
+      return;
+    }
+
+    const token = localStorage.getItem('token');
+    try {
+      const response = await fetch('http://localhost:5283/api/stores/fix-product-codes', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        setSnackbar({
+          open: true,
+          message: `${result.message} (${result.fixedCount} ürün düzeltildi)`,
+          severity: 'success'
+        });
+      } else {
+        const errorData = await response.json();
+        setSnackbar({
+          open: true,
+          message: errorData.message || 'Ürün kodları düzeltilirken bir hata oluştu',
+          severity: 'error'
+        });
+      }
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: 'Bağlantı hatası',
+        severity: 'error'
+      });
+    }
+  };
+
+  const handleForceDeleteStore = async (storeId: number) => {
+    if (!window.confirm('⚠️ DİKKAT! Bu işlem mağazayı ve tüm bağlı kayıtları zorla silecektir!\n\nBu işlem geri alınamaz. Devam etmek istiyor musunuz?')) {
+      return;
+    }
+
+    const token = localStorage.getItem('token');
+    console.log('🔍 Force Delete Debug:', { storeId, token: token ? 'Token exists' : 'No token' });
+    
+    try {
+      const response = await fetch(`http://localhost:5283/api/stores/force-delete/${storeId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      console.log('🔍 Response Status:', response.status, response.statusText);
+      
+      if (response.ok) {
+        const result = await response.json();
+        console.log('🔍 Success Result:', result);
+        setSnackbar({
+          open: true,
+          message: `${result.message}`,
+          severity: 'success'
+        });
+        fetchStores(); // Listeyi yenile
+      } else {
+        const errorData = await response.json();
+        console.log('🔍 Error Response:', errorData);
+        setSnackbar({
+          open: true,
+          message: errorData.message || 'Mağaza zorla silinirken bir hata oluştu',
+          severity: 'error'
+        });
+      }
+    } catch (error) {
+      console.log('🔍 Catch Error:', error);
+      setSnackbar({
+        open: true,
+        message: 'Bağlantı hatası',
+        severity: 'error'
+      });
+    }
+  };
+
+  const handleClearAllStores = async () => {
+    const confirmMessage = `⚠️ DİKKAT! Bu işlem geri alınamaz!\n\n` +
+      `Veritabanındaki TÜM mağazaları (${stores.length} adet) ve bunlara bağlı:\n` +
+      `• Tüm çalışanlar\n` +
+      `• Tüm ürünler\n` +
+      `• Tüm kullanıcı hesapları\n` +
+      `• Tüm stok kayıtları\n\n` +
+      `sileceksiniz. Bu işlemi gerçekten yapmak istiyor musunuz?`;
+
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+
+    // İkinci onay
+    const finalConfirm = window.confirm(`🚨 SON UYARI!\n\n` +
+      `"EVET" yazmanız gerekiyor. Bu işlem gerçekten geri alınamaz!\n\n` +
+      `Onaylamak için "EVET" yazın:`);
+
+    if (finalConfirm) {
+      const userInput = prompt('Onaylamak için "EVET" yazın:');
+      if (userInput !== 'EVET') {
+        setSnackbar({
+          open: true,
+          message: 'İşlem iptal edildi',
+          severity: 'info'
+        });
+        return;
+      }
+    } else {
+      return;
+    }
+
+    const token = localStorage.getItem('token');
+    try {
+      const response = await fetch('http://localhost:5283/api/stores/clear-all', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        setSnackbar({
+          open: true,
+          message: `${result.message} (${result.deletedCount} mağaza silindi)`,
+          severity: 'success'
+        });
+        fetchStores(); // Listeyi yenile
+      } else {
+        const errorData = await response.json();
+        setSnackbar({
+          open: true,
+          message: errorData.message || 'Mağazalar silinirken bir hata oluştu',
+          severity: 'error'
+        });
+      }
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: 'Bağlantı hatası',
+        severity: 'error'
+      });
+    }
+  };
+
   const filteredStores = stores.filter(store =>
     store.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     store.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -240,21 +394,59 @@ const StoreListPage: React.FC = () => {
               Tüm mağazaları görüntüle, düzenle ve yönet
             </Typography>
           </Box>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={handleAddStore}
-            sx={{ 
-              height: 'fit-content',
-              background: 'linear-gradient(45deg, #1976d2 30%, #42a5f5 90%)',
-              boxShadow: '0 3px 5px 2px rgba(33, 150, 243, .3)',
-              '&:hover': {
-                background: 'linear-gradient(45deg, #1565c0 30%, #1976d2 90%)',
-              }
-            }}
-          >
-            Yeni Mağaza Ekle
-          </Button>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+             <Button
+               variant="contained"
+               startIcon={<AddIcon />}
+               onClick={handleAddStore}
+               sx={{ 
+                 height: 'fit-content',
+                 background: 'linear-gradient(45deg, #1976d2 30%, #42a5f5 90%)',
+                 boxShadow: '0 3px 5px 2px rgba(33, 150, 243, .3)',
+                 '&:hover': {
+                   background: 'linear-gradient(45deg, #1565c0 30%, #1976d2 90%)',
+                 }
+               }}
+             >
+               Yeni Mağaza Ekle
+             </Button>
+             
+             <Button
+               variant="outlined"
+               color="warning"
+               onClick={handleFixProductCodes}
+               sx={{ 
+                 height: 'fit-content',
+                 borderColor: '#ff9800',
+                 color: '#ff9800',
+                 '&:hover': {
+                   borderColor: '#f57c00',
+                   backgroundColor: 'rgba(255, 152, 0, 0.04)',
+                 }
+               }}
+             >
+               Ürün Kodlarını Düzelt
+             </Button>
+             
+             {stores.length > 0 && (
+               <Button
+                 variant="outlined"
+                 color="error"
+                 onClick={handleClearAllStores}
+                 sx={{ 
+                   height: 'fit-content',
+                   borderColor: '#f44336',
+                   color: '#f44336',
+                   '&:hover': {
+                     borderColor: '#d32f2f',
+                     backgroundColor: 'rgba(244, 67, 54, 0.04)',
+                   }
+                 }}
+               >
+                 Tüm Mağazaları Sil ({stores.length})
+               </Button>
+             )}
+           </Box>
         </Box>
 
         {/* Arama Kutusu ve Görünüm Seçenekleri */}
@@ -388,6 +580,12 @@ const StoreListPage: React.FC = () => {
                   <Tooltip title="Sil">
                     <IconButton 
                       onClick={() => handleDeleteStore(store.id)}
+                      onContextMenu={(e) => {
+                        e.preventDefault();
+                        if (window.confirm('⚠️ ZORLA SİLME\n\nNormal silme işlemi başarısız olduysa, zorla silme yapmak istiyor musunuz?\n\nBu işlem foreign key kontrolünü devre dışı bırakarak tüm bağlı kayıtları silecektir.')) {
+                          handleForceDeleteStore(store.id);
+                        }
+                      }}
                       sx={{ 
                         color: '#f44336',
                         '&:hover': { backgroundColor: 'rgba(244, 67, 54, 0.04)' }
@@ -452,7 +650,16 @@ const StoreListPage: React.FC = () => {
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="Sil">
-                      <IconButton onClick={() => handleDeleteStore(store.id)} color="error">
+                      <IconButton 
+                        onClick={() => handleDeleteStore(store.id)}
+                        onContextMenu={(e) => {
+                          e.preventDefault();
+                          if (window.confirm('⚠️ ZORLA SİLME\n\nNormal silme işlemi başarısız olduysa, zorla silme yapmak istiyor musunuz?\n\nBu işlem foreign key kontrolünü devre dışı bırakarak tüm bağlı kayıtları silecektir.')) {
+                            handleForceDeleteStore(store.id);
+                          }
+                        }}
+                        color="error"
+                      >
                         <DeleteIcon />
                       </IconButton>
                     </Tooltip>
@@ -517,6 +724,7 @@ const StoreListPage: React.FC = () => {
                 onChange={(e) => setStoreForm({ ...storeForm, email: e.target.value })}
                 fullWidth
                 required
+                helperText="Bu e-posta ile mağaza kullanıcısı girişi yapılabilir"
               />
               <TextField
                 label="Şifre"
@@ -526,6 +734,18 @@ const StoreListPage: React.FC = () => {
                 fullWidth
                 required={!editMode}
                 helperText={editMode ? 'Değiştirmek istemiyorsanız boş bırakın' : ''}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowPassword(!showPassword)}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
               />
               <FormControl fullWidth>
                 <InputLabel>Durum</InputLabel>
@@ -549,6 +769,8 @@ const StoreListPage: React.FC = () => {
                   <MenuItem value="false">Yurt Dışı</MenuItem>
                 </Select>
               </FormControl>
+              
+              {/* Otomatik veri ekleme bilgisi kaldırıldı; veriler mağaza tarafından manuel girilecek */}
             </Box>
           </DialogContent>
           <DialogActions sx={{ p: 2 }}>

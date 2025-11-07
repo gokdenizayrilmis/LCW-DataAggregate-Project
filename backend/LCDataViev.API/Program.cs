@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
+using LCDataViev.API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,6 +35,8 @@ builder.Services.AddScoped<IReturnRepository, ReturnRepository>();
 builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IWeeklySaleRepository, WeeklySaleRepository>();
+builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
 
 // JWT Configuration
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
@@ -66,7 +69,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowedOrigins", policy =>
     {
-        policy.WithOrigins("http://localhost:3000", "http://localhost:3001", "http://localhost:4000") // Admin panel port'u eklendi
+        policy.WithOrigins("http://localhost:3000", "http://localhost:3001", "http://localhost:4000", "http://localhost:5173") // Admin panel ve Vite port'ları eklendi
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials()
@@ -93,6 +96,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// Error Handling Middleware (en üstte olmalı)
+app.UseMiddleware<ErrorHandlingMiddleware>();
 
 // Security Middleware
 app.UseHsts();

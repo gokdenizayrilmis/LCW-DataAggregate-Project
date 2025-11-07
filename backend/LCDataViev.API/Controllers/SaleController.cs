@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using LCDataViev.API.Models.Entities;
 using LCDataViev.API.Repositories;
+using Microsoft.AspNetCore.Authorization;
 
 namespace LCDataViev.API.Controllers
 {
@@ -51,11 +52,37 @@ namespace LCDataViev.API.Controllers
             }
         }
 
+        // GET: api/Sale/store/5
+        [HttpGet("store/{storeId}")]
+        public async Task<ActionResult<IEnumerable<Sale>>> GetSalesByStore(int storeId)
+        {
+            try
+            {
+                var sales = await _saleRepository.GetSalesByStoreAsync(storeId);
+                return Ok(sales);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting sales for store ID: {StoreId}", storeId);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
         [HttpPost]
+        [Authorize(Roles = "user")]
         public async Task<ActionResult<Sale>> Create(Sale sale)
         {
             try
             {
+                var storeIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "storeId")?.Value;
+                if (!int.TryParse(storeIdClaim, out var userStoreId) || userStoreId <= 0)
+                {
+                    return Forbid();
+                }
+                if (sale.StoreId != userStoreId)
+                {
+                    return Forbid();
+                }
                 await _saleRepository.AddAsync(sale);
                 return CreatedAtAction(nameof(GetById), new { id = sale.Id }, sale);
             }
@@ -67,6 +94,7 @@ namespace LCDataViev.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "user")]
         public async Task<IActionResult> Update(int id, Sale sale)
         {
             if (id != sale.Id)
@@ -76,6 +104,15 @@ namespace LCDataViev.API.Controllers
 
             try
             {
+                var storeIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "storeId")?.Value;
+                if (!int.TryParse(storeIdClaim, out var userStoreId) || userStoreId <= 0)
+                {
+                    return Forbid();
+                }
+                if (sale.StoreId != userStoreId)
+                {
+                    return Forbid();
+                }
                 await _saleRepository.UpdateAsync(sale);
                 return NoContent();
             }
@@ -87,6 +124,7 @@ namespace LCDataViev.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "user")]
         public async Task<IActionResult> Delete(int id)
         {
             try
@@ -95,6 +133,16 @@ namespace LCDataViev.API.Controllers
                 if (sale == null)
                 {
                     return NotFound();
+                }
+
+                var storeIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "storeId")?.Value;
+                if (!int.TryParse(storeIdClaim, out var userStoreId) || userStoreId <= 0)
+                {
+                    return Forbid();
+                }
+                if (sale.StoreId != userStoreId)
+                {
+                    return Forbid();
                 }
 
                 await _saleRepository.DeleteAsync(sale);
