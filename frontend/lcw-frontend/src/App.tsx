@@ -1,12 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { CssBaseline, Container, Box } from '@mui/material';
-import Footer from './components/Footer';
+import { CssBaseline, Box } from '@mui/material';
 import HomePage from './pages/HomePage';
-import DashboardPage from './pages/DashboardPage';
 import StoreDetailPage from './pages/StoreDetailPage';
-import lcwLogo from './assets/lcw-logo.png';
 
 const theme = createTheme({
   palette: {
@@ -123,26 +120,15 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        <Box sx={{ 
-          minHeight: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          background: 'linear-gradient(135deg, #f8fafc 0%, #e3f2fd 50%, #f3e5f5 100%)',
-        }}>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            
-            {/* Dashboard sayfası */}
-            <Route path="/dashboard" element={
-              <Container maxWidth="lg" sx={{ py: 2, flex: 1 }}>
-                <DashboardPage />
-              </Container>
-            } />
-            
-            {/* Mağaza detay sayfası */}
-            <Route path="/store/:storeId" element={<StoreDetailPage />} />
-          </Routes>
-        </Box>
+        <Routes>
+          {/* Login sayfası */}
+          <Route path="/" element={<HomePage />} />
+          
+          {/* Mağaza detay sayfası - Ana sayfa */}
+          <Route path="/store/:storeId" element={<StoreDetailPage />} />
+          
+          {/* Diğer rotalar buraya eklenecek */}
+        </Routes>
       </Router>
     </ThemeProvider>
   );

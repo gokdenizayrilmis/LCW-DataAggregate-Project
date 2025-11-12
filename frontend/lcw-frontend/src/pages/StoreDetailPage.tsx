@@ -11,15 +11,12 @@ import {
   Tab,
   Tabs,
   CardMedia,
-  TextField,
-  InputAdornment,
   LinearProgress
 } from '@mui/material';
 import {
   Store as StoreIcon,
   Inventory2 as InventoryIcon,
   TrendingUp as TrendingUpIcon,
-  Search as SearchIcon,
   People as PeopleIcon,
   Phone as PhoneIcon,
   Email as EmailIcon,
@@ -27,6 +24,7 @@ import {
 } from '@mui/icons-material';
 import { useParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import Sidebar from '../components/Sidebar';
 import Footer from '../components/Footer';
 
 interface StoreData {
@@ -79,7 +77,6 @@ const StoreDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [currentTab, setCurrentTab] = useState(0);
-  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     if (storeId) {
@@ -159,11 +156,6 @@ const StoreDetailPage: React.FC = () => {
     setCurrentTab(newValue);
   };
 
-  const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.category.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
@@ -174,20 +166,25 @@ const StoreDetailPage: React.FC = () => {
 
   if (error) {
     return (
-      <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', bgcolor: '#f5f5f5' }}>
         <Navbar />
-        <Box sx={{ p: 3, flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <Alert severity="error" sx={{ fontSize: '1.2rem' }}>
-            {error}
-          </Alert>
+        <Box sx={{ display: 'flex', flex: 1 }}>
+          <Sidebar />
+          <Box component="main" sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <Box sx={{ p: 3, flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              <Alert severity="error" sx={{ fontSize: '1.2rem' }}>
+                {error}
+              </Alert>
+            </Box>
+            <Footer />
+          </Box>
         </Box>
-        <Footer />
       </Box>
     );
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', bgcolor: '#f5f5f5' }}>
       <Navbar 
         storeData={storeData ? {
           id: storeData.id,
@@ -196,90 +193,234 @@ const StoreDetailPage: React.FC = () => {
         } : undefined}
       />
 
-      <Box sx={{ p: 3, flex: 1 }}>
-        {/* Store Info Card */}
-        <Card sx={{ mb: 3, borderRadius: 3, background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)' }}>
-          <CardContent>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-              <StoreIcon sx={{ fontSize: 40, color: '#1976d2' }} />
-              <Box>
-                <Typography variant="h4" sx={{ fontWeight: 700, color: '#1976d2' }}>
-                  {storeData?.name || 'Mağaza'}
-                </Typography>
-                <Typography variant="body1" sx={{ color: '#666' }}>
-                  Mağaza Detayları
-                </Typography>
+      <Box sx={{ display: 'flex', flex: 1 }}>
+        <Sidebar />
+        <Box component="main" sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <Box sx={{ p: 3, flex: 1, mt: 2, mr: 2, overflowX: 'auto' }}>
+        {/* Store Info Card - Mağaza Tanıtımı */}
+        <Card sx={{ 
+          mb: 3, 
+          borderRadius: 3, 
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          boxShadow: '0 4px 20px rgba(102, 126, 234, 0.25)',
+          overflow: 'hidden',
+          position: 'relative'
+        }}>
+          <Box sx={{ 
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            width: '40%',
+            height: '100%',
+            background: 'radial-gradient(circle at top right, rgba(255,255,255,0.2) 0%, transparent 70%)',
+            pointerEvents: 'none'
+          }} />
+          
+          <CardContent sx={{ p: 4, position: 'relative', zIndex: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 3, mb: 3 }}>
+              <Box sx={{ 
+                bgcolor: 'rgba(255,255,255,0.25)',
+                borderRadius: 3,
+                p: 2,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <StoreIcon sx={{ fontSize: 56, color: 'white' }} />
               </Box>
-            </Box>
-            
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: 2 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <LocationIcon sx={{ color: '#666' }} />
-                <Typography variant="body2" sx={{ color: '#666' }}>
-                  {storeData?.address || 'Adres bilgisi yok'}
+              
+              <Box sx={{ flex: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+                  <Typography variant="h4" sx={{ fontWeight: 700, color: 'white' }}>
+                    {storeData?.name || 'Mağaza'}
+                  </Typography>
+                  <Chip 
+                    label={storeData?.isActive ? 'Aktif' : 'Pasif'}
+                    sx={{ 
+                      bgcolor: storeData?.isActive ? 'rgba(76, 175, 80, 0.9)' : 'rgba(244, 67, 54, 0.9)',
+                      color: 'white',
+                      fontWeight: 700,
+                      fontSize: '0.85rem',
+                      height: 32,
+                      borderRadius: 2
+                    }}
+                  />
+                </Box>
+                <Typography variant="h6" sx={{ color: 'rgba(255,255,255,0.95)', fontWeight: 500, mb: 3 }}>
+                  Mağaza Yönetim Paneli
                 </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <PhoneIcon sx={{ color: '#666' }} />
-                <Typography variant="body2" sx={{ color: '#666' }}>
-                  {storeData?.phone || 'Telefon bilgisi yok'}
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <EmailIcon sx={{ color: '#666' }} />
-                <Typography variant="body2" sx={{ color: '#666' }}>
-                  {storeData?.email || 'Email bilgisi yok'}
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <StoreIcon sx={{ color: storeData?.isActive ? '#4caf50' : '#f44336' }} />
-                <Typography variant="body2" sx={{ color: storeData?.isActive ? '#4caf50' : '#f44336' }}>
-                  {storeData?.isActive ? 'Aktif' : 'Pasif'}
-                </Typography>
+                
+                <Box sx={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' }, 
+                  gap: 2 
+                }}>
+                  <Box sx={{ 
+                    bgcolor: 'rgba(255,255,255,0.15)', 
+                    backdropFilter: 'blur(10px)',
+                    p: 2, 
+                    borderRadius: 2,
+                    border: '1px solid rgba(255,255,255,0.2)'
+                  }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                      <LocationIcon sx={{ color: 'white', fontSize: 20 }} />
+                      <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600, textTransform: 'uppercase' }}>
+                        Adres
+                      </Typography>
+                    </Box>
+                    <Typography variant="body1" sx={{ color: 'white', fontWeight: 600 }}>
+                      {storeData?.address || 'Belirtilmemiş'}
+                    </Typography>
+                  </Box>
+                  
+                  <Box sx={{ 
+                    bgcolor: 'rgba(255,255,255,0.15)', 
+                    backdropFilter: 'blur(10px)',
+                    p: 2, 
+                    borderRadius: 2,
+                    border: '1px solid rgba(255,255,255,0.2)'
+                  }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                      <PhoneIcon sx={{ color: 'white', fontSize: 20 }} />
+                      <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600, textTransform: 'uppercase' }}>
+                        Telefon
+                      </Typography>
+                    </Box>
+                    <Typography variant="body1" sx={{ color: 'white', fontWeight: 600 }}>
+                      {storeData?.phone || 'Belirtilmemiş'}
+                    </Typography>
+                  </Box>
+                  
+                  <Box sx={{ 
+                    bgcolor: 'rgba(255,255,255,0.15)', 
+                    backdropFilter: 'blur(10px)',
+                    p: 2, 
+                    borderRadius: 2,
+                    border: '1px solid rgba(255,255,255,0.2)'
+                  }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                      <EmailIcon sx={{ color: 'white', fontSize: 20 }} />
+                      <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600, textTransform: 'uppercase' }}>
+                        E-posta
+                      </Typography>
+                    </Box>
+                    <Typography variant="body1" sx={{ color: 'white', fontWeight: 600 }}>
+                      {storeData?.email || 'Belirtilmemiş'}
+                    </Typography>
+                  </Box>
+                </Box>
               </Box>
             </Box>
           </CardContent>
         </Card>
 
-        {/* Stats Cards */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: 3, mb: 3 }}>
-          <Card sx={{ borderRadius: 3, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-            <CardContent sx={{ textAlign: 'center', color: 'white' }}>
-              <PeopleIcon sx={{ fontSize: 40, mb: 1 }} />
-              <Typography variant="h4" sx={{ fontWeight: 700 }}>
+        {/* Stats Cards - Modern & Soft Colors */}
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: 2.5, mb: 3 }}>
+          <Card sx={{ 
+            borderRadius: 2.5, 
+            bgcolor: '#f0f7ff',
+            border: '1px solid #d6e7ff',
+            boxShadow: '0 2px 8px rgba(66, 133, 244, 0.08)'
+          }}>
+            <CardContent sx={{ textAlign: 'center', p: 2.5 }}>
+              <Box sx={{ 
+                bgcolor: '#4285f4',
+                borderRadius: 2,
+                width: 56,
+                height: 56,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto',
+                mb: 1.5
+              }}>
+                <PeopleIcon sx={{ fontSize: 32, color: 'white' }} />
+              </Box>
+              <Typography variant="h4" sx={{ fontWeight: 700, color: '#1a73e8', mb: 0.5 }}>
                 {employees.length}
               </Typography>
-              <Typography variant="body2">Çalışan</Typography>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: '#5f6368' }}>Çalışan</Typography>
             </CardContent>
           </Card>
 
-          <Card sx={{ borderRadius: 3, background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' }}>
-            <CardContent sx={{ textAlign: 'center', color: 'white' }}>
-              <InventoryIcon sx={{ fontSize: 40, mb: 1 }} />
-              <Typography variant="h4" sx={{ fontWeight: 700 }}>
+          <Card sx={{ 
+            borderRadius: 2.5, 
+            bgcolor: '#fef7ff',
+            border: '1px solid #f3e5f5',
+            boxShadow: '0 2px 8px rgba(156, 39, 176, 0.08)'
+          }}>
+            <CardContent sx={{ textAlign: 'center', p: 2.5 }}>
+              <Box sx={{ 
+                bgcolor: '#9c27b0',
+                borderRadius: 2,
+                width: 56,
+                height: 56,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto',
+                mb: 1.5
+              }}>
+                <InventoryIcon sx={{ fontSize: 32, color: 'white' }} />
+              </Box>
+              <Typography variant="h4" sx={{ fontWeight: 700, color: '#9c27b0', mb: 0.5 }}>
                 {products.length}
               </Typography>
-              <Typography variant="body2">Ürün</Typography>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: '#5f6368' }}>Ürün</Typography>
             </CardContent>
           </Card>
 
-          <Card sx={{ borderRadius: 3, background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' }}>
-            <CardContent sx={{ textAlign: 'center', color: 'white' }}>
-              <TrendingUpIcon sx={{ fontSize: 40, mb: 1 }} />
-              <Typography variant="h4" sx={{ fontWeight: 700 }}>
+          <Card sx={{ 
+            borderRadius: 2.5, 
+            bgcolor: '#e8f5e9',
+            border: '1px solid #c8e6c9',
+            boxShadow: '0 2px 8px rgba(76, 175, 80, 0.08)'
+          }}>
+            <CardContent sx={{ textAlign: 'center', p: 2.5 }}>
+              <Box sx={{ 
+                bgcolor: '#4caf50',
+                borderRadius: 2,
+                width: 56,
+                height: 56,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto',
+                mb: 1.5
+              }}>
+                <TrendingUpIcon sx={{ fontSize: 32, color: 'white' }} />
+              </Box>
+              <Typography variant="h4" sx={{ fontWeight: 700, color: '#2e7d32', mb: 0.5 }}>
                 {storeData?.saleCount || 0}
               </Typography>
-              <Typography variant="body2">Satış</Typography>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: '#5f6368' }}>Satış</Typography>
             </CardContent>
           </Card>
 
-          <Card sx={{ borderRadius: 3, background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)' }}>
-            <CardContent sx={{ textAlign: 'center', color: 'white' }}>
-              <StoreIcon sx={{ fontSize: 40, mb: 1 }} />
-              <Typography variant="h4" sx={{ fontWeight: 700 }}>
+          <Card sx={{ 
+            borderRadius: 2.5, 
+            bgcolor: '#fff8e1',
+            border: '1px solid #ffecb3',
+            boxShadow: '0 2px 8px rgba(255, 152, 0, 0.08)'
+          }}>
+            <CardContent sx={{ textAlign: 'center', p: 2.5 }}>
+              <Box sx={{ 
+                bgcolor: '#ff9800',
+                borderRadius: 2,
+                width: 56,
+                height: 56,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto',
+                mb: 1.5
+              }}>
+                <StoreIcon sx={{ fontSize: 32, color: 'white' }} />
+              </Box>
+              <Typography variant="h4" sx={{ fontWeight: 700, color: '#ef6c00', mb: 0.5 }}>
                 {storeData?.inventoryCount || 0}
               </Typography>
-              <Typography variant="body2">Stok</Typography>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: '#5f6368' }}>Stok</Typography>
             </CardContent>
           </Card>
         </Box>
@@ -310,36 +451,80 @@ const StoreDetailPage: React.FC = () => {
 
         {/* Tab İçerikleri */}
         {currentTab === 0 && (
-          <Card sx={{ borderRadius: 3 }}>
-            <CardContent>
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: '#1976d2' }}>
-                Mağaza Özeti
+          <Card sx={{ borderRadius: 3, bgcolor: 'white', boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
+            <CardContent sx={{ p: 3 }}>
+              <Typography variant="h5" sx={{ fontWeight: 700, mb: 3, color: '#1976d2' }}>
+                Hoş Geldiniz! 👋
               </Typography>
               
-              {employees.length === 0 && products.length === 0 ? (
-                <Alert severity="info" sx={{ mb: 2 }}>
-                  Bu mağaza için henüz çalışan veya ürün bilgisi eklenmemiş.
-                </Alert>
-              ) : (
+              <Box sx={{ 
+                bgcolor: '#f8f9fa',
+                borderRadius: 2,
+                p: 3,
+                border: '1px solid #e9ecef'
+              }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: '#495057' }}>
+                  Mağaza Özeti
+                </Typography>
+                
                 <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 3 }}>
-                  <Box>
-                    <Typography variant="h6" sx={{ mb: 2, color: '#666' }}>
-                      Çalışan Durumu
-                    </Typography>
-                    <Typography variant="body1">
-                      Toplam {employees.length} çalışan bulunuyor.
+                  <Box sx={{ 
+                    bgcolor: 'white',
+                    p: 2.5,
+                    borderRadius: 2,
+                    border: '1px solid #dee2e6'
+                  }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+                      <Box sx={{ 
+                        bgcolor: '#e7f3ff',
+                        borderRadius: 1.5,
+                        p: 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        <PeopleIcon sx={{ color: '#1976d2', fontSize: 24 }} />
+                      </Box>
+                      <Typography variant="h6" sx={{ fontWeight: 600, color: '#343a40' }}>
+                        Çalışan Bilgisi
+                      </Typography>
+                    </Box>
+                    <Typography variant="body1" sx={{ color: '#6c757d', pl: 5 }}>
+                      {employees.length > 0 
+                        ? `Mağazanızda ${employees.length} çalışan görev yapmaktadır.`
+                        : 'Henüz çalışan eklenmemiş.'}
                     </Typography>
                   </Box>
-                  <Box>
-                    <Typography variant="h6" sx={{ mb: 2, color: '#666' }}>
-                      Ürün Durumu
-                    </Typography>
-                    <Typography variant="body1">
-                      Toplam {products.length} ürün bulunuyor.
+                  
+                  <Box sx={{ 
+                    bgcolor: 'white',
+                    p: 2.5,
+                    borderRadius: 2,
+                    border: '1px solid #dee2e6'
+                  }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+                      <Box sx={{ 
+                        bgcolor: '#f3e5f5',
+                        borderRadius: 1.5,
+                        p: 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        <InventoryIcon sx={{ color: '#9c27b0', fontSize: 24 }} />
+                      </Box>
+                      <Typography variant="h6" sx={{ fontWeight: 600, color: '#343a40' }}>
+                        Ürün Bilgisi
+                      </Typography>
+                    </Box>
+                    <Typography variant="body1" sx={{ color: '#6c757d', pl: 5 }}>
+                      {products.length > 0 
+                        ? `Toplamda ${products.length} ürün mevcut.`
+                        : 'Henüz ürün eklenmemiş.'}
                     </Typography>
                   </Box>
                 </Box>
-              )}
+              </Box>
             </CardContent>
           </Card>
         )}
@@ -360,12 +545,7 @@ const StoreDetailPage: React.FC = () => {
                   {employees.map((employee) => (
                     <Card key={employee.id} sx={{ 
                       borderRadius: 2, 
-                      boxShadow: '0 2px 12px rgba(0,0,0,0.1)',
-                      transition: 'all 0.3s ease',
-                      '&:hover': { 
-                        transform: 'translateY(-4px)',
-                        boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
-                      }
+                      boxShadow: '0 2px 12px rgba(0,0,0,0.08)'
                     }}>
                       <CardContent sx={{ textAlign: 'center', p: 3 }}>
                         <Avatar 
@@ -414,31 +594,11 @@ const StoreDetailPage: React.FC = () => {
 
         {currentTab === 2 && (
           <Box>
-            {/* Arama */}
-            <Card sx={{ mb: 3, borderRadius: 3 }}>
-              <CardContent>
-                <TextField
-                  fullWidth
-                  placeholder="Ürün ara (isim, kategori)..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchIcon />
-                      </InputAdornment>
-                    ),
-                  }}
-                  sx={{ borderRadius: 2 }}
-                />
-              </CardContent>
-            </Card>
-
             {/* Ürünler */}
-            <Card sx={{ borderRadius: 3 }}>
-              <CardContent>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: '#1976d2' }}>
-                  Mağaza Ürünleri ({filteredProducts.length} ürün)
+            <Card sx={{ borderRadius: 3, boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="h5" sx={{ fontWeight: 700, mb: 3, color: '#1976d2' }}>
+                  Mağaza Ürünleri ({products.length} ürün)
                 </Typography>
                 
                 {products.length === 0 ? (
@@ -446,16 +606,11 @@ const StoreDetailPage: React.FC = () => {
                     Bu mağaza için henüz ürün bilgisi eklenmemiş.
                   </Alert>
                 ) : (
-                  <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' }, gap: 3 }}>
-                    {filteredProducts.map((product) => (
+                  <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' }, gap: 2.5 }}>
+                    {products.map((product) => (
                       <Card key={product.id} sx={{ 
                         borderRadius: 2,
-                        boxShadow: '0 2px 12px rgba(0,0,0,0.1)',
-                        transition: 'all 0.3s ease',
-                        '&:hover': { 
-                          transform: 'translateY(-4px)',
-                          boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
-                        }
+                        boxShadow: '0 2px 12px rgba(0,0,0,0.08)'
                       }}>
                         <CardMedia
                           component="img"
@@ -502,9 +657,10 @@ const StoreDetailPage: React.FC = () => {
             </Card>
           </Box>
         )}
+          </Box>
+          <Footer />
+        </Box>
       </Box>
-      
-      <Footer />
     </Box>
   );
 };

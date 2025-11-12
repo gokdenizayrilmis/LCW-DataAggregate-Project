@@ -1,14 +1,32 @@
 import React, { useState } from 'react';
-import { Box, Typography, TextField, Stack, FormControlLabel, Switch, Button, Alert, CircularProgress, Card, CardContent } from '@mui/material';
+import { Box, Typography, TextField, Stack, FormControlLabel, Switch, Button, Alert, CircularProgress, Card, CardContent, Dialog, DialogTitle, DialogContent, DialogActions, IconButton } from '@mui/material';
+import { ContentCopy as CopyIcon, CheckCircle as CheckIcon } from '@mui/icons-material';
 import AdminNavbar from '../components/AdminNavbar';
 import Sidebar from '../components/Sidebar';
 import Footer from '../components/Footer';
+
+interface StoreResponse {
+  id: number;
+  name: string;
+  email: string;
+  userEmail?: string;
+  tempPassword?: string;
+}
 
 const StoreManagementPage: React.FC = () => {
   const [form, setForm] = useState({ name: '', address: '', email: '', password: '', phone: '', isActive: true, isDomestic: true });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [createdStore, setCreatedStore] = useState<StoreResponse | null>(null);
+  const [showCredentialsDialog, setShowCredentialsDialog] = useState(false);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
+
+  const copyToClipboard = (text: string, field: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedField(field);
+    setTimeout(() => setCopiedField(null), 2000);
+  };
 
   const submit = async () => {
     setError(''); setSuccess('');
@@ -25,6 +43,10 @@ const StoreManagementPage: React.FC = () => {
         body: JSON.stringify(form)
       });
       if (!res.ok) throw new Error('Mağaza eklenemedi');
+      
+      const responseData: StoreResponse = await res.json();
+      setCreatedStore(responseData);
+      setShowCredentialsDialog(true);
       setSuccess('Mağaza başarıyla eklendi ve kullanıcı oluşturuldu.');
       setForm({ name: '', address: '', email: '', password: '', phone: '', isActive: true, isDomestic: true });
     } catch (e: any) {
@@ -32,6 +54,11 @@ const StoreManagementPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const closeDialog = () => {
+    setShowCredentialsDialog(false);
+    setCreatedStore(null);
   };
 
   return (
@@ -73,6 +100,89 @@ const StoreManagementPage: React.FC = () => {
           <Footer />
         </Box>
       </Box>
+
+      {/* Credentials Dialog - Kullanıcı Bilgileri */}
+      <Dialog 
+        open={showCredentialsDialog} 
+        onClose={closeDialog}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ bgcolor: '#1976d2', color: 'white', fontWeight: 700 }}>
+          ✅ Mağaza Başarıyla Oluşturuldu!
+        </DialogTitle>
+        <DialogContent sx={{ mt: 3 }}>
+          <Alert severity="success" sx={{ mb: 3 }}>
+            <Typography variant="body1" sx={{ fontWeight: 600, mb: 1 }}>
+              {createdStore?.name} mağazası için kullanıcı hesabı oluşturuldu.
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Aşağıdaki bilgileri not alın ve mağaza yetkilisine iletin. Bu bilgilerle user panelinden giriş yapılabilir.
+            </Typography>
+          </Alert>
+
+          <Card sx={{ mb: 2, bgcolor: '#f5f5f5', borderRadius: 2 }}>
+            <CardContent>
+              <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+                E-posta (Kullanıcı Adı)
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <TextField
+                  value={createdStore?.userEmail || createdStore?.email || ''}
+                  fullWidth
+                  variant="outlined"
+                  InputProps={{
+                    readOnly: true,
+                    sx: { fontWeight: 600, bgcolor: 'white' }
+                  }}
+                />
+                <IconButton 
+                  onClick={() => copyToClipboard(createdStore?.userEmail || createdStore?.email || '', 'email')}
+                  color={copiedField === 'email' ? 'success' : 'primary'}
+                >
+                  {copiedField === 'email' ? <CheckIcon /> : <CopyIcon />}
+                </IconButton>
+              </Box>
+            </CardContent>
+          </Card>
+
+          <Card sx={{ mb: 2, bgcolor: '#fff3e0', borderRadius: 2 }}>
+            <CardContent>
+              <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+                Şifre
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <TextField
+                  value={createdStore?.tempPassword || ''}
+                  fullWidth
+                  variant="outlined"
+                  InputProps={{
+                    readOnly: true,
+                    sx: { fontWeight: 600, bgcolor: 'white', fontFamily: 'monospace' }
+                  }}
+                />
+                <IconButton 
+                  onClick={() => copyToClipboard(createdStore?.tempPassword || '', 'password')}
+                  color={copiedField === 'password' ? 'success' : 'primary'}
+                >
+                  {copiedField === 'password' ? <CheckIcon /> : <CopyIcon />}
+                </IconButton>
+              </Box>
+            </CardContent>
+          </Card>
+
+          <Alert severity="warning" sx={{ mt: 2 }}>
+            <Typography variant="body2">
+              ⚠️ Bu şifre sadece bir kez gösterilmektedir. Lütfen güvenli bir yere kaydedin.
+            </Typography>
+          </Alert>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={closeDialog} variant="contained" fullWidth>
+            Anladım, Kapat
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

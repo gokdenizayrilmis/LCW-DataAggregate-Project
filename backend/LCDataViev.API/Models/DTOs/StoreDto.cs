@@ -65,6 +65,10 @@ namespace LCDataViev.API.Models.DTOs
         public int SaleCount { get; set; }
         public int ReturnCount { get; set; }
         public int InventoryCount { get; set; }
+        
+        // Yeni mağaza oluşturulduğunda kullanıcı bilgilerini döndür
+        public string? UserEmail { get; set; }
+        public string? TempPassword { get; set; } // Sadece create işleminde dolu
     }
 
     // List Response DTO

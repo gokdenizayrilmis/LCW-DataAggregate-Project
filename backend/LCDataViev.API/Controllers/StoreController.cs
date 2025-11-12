@@ -205,6 +205,7 @@ namespace LCDataViev.API.Controllers
                 // Mağaza ile birlikte kullanıcı oluştur
                 var passwordHash = BCrypt.Net.BCrypt.HashPassword(createStoreDto.Password);
                 _logger.LogInformation($"Creating user for store: {createStoreDto.Name}, Email: {createStoreDto.Email}");
+                _logger.LogInformation($"Generated password hash for verification");
                 
                 var user = new User
                 {
@@ -220,7 +221,8 @@ namespace LCDataViev.API.Controllers
                     UpdatedAt = DateTime.UtcNow
                 };
 
-                await _userRepository.AddAsync(user);
+                var createdUser = await _userRepository.AddAsync(user);
+                _logger.LogInformation($"✅ Successfully created user: ID={createdUser.Id}, Email={createdUser.Email}, StoreId={createdUser.StoreId}");
 
                 // Otomatik veri ekleme kaldırıldı: Çalışan/Ürün vb. manuel eklenecek
 
@@ -238,7 +240,9 @@ namespace LCDataViev.API.Controllers
                     UserCount = 1,
                     SaleCount = 0,
                     ReturnCount = 0,
-                    InventoryCount = 0
+                    InventoryCount = 0,
+                    UserEmail = createdUser.Email,
+                    TempPassword = createStoreDto.Password // Sadece create işleminde döndür
                 };
 
                 return CreatedAtAction(nameof(GetStore), new { id = createdStore.Id }, response);

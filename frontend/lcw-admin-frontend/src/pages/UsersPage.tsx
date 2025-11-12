@@ -96,44 +96,77 @@ const UsersPage: React.FC = () => {
       <AdminNavbar />
       <Box sx={{ display: 'flex', flex: 1 }}>
         <Sidebar />
-        <Box component="main" sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-          <Box sx={{ flexGrow: 1, p: 2, mt: 8 }}>
+        <Box component="main" sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <Box sx={{ flexGrow: 1, p: 3, mt: 8, mr: 2, overflowX: 'auto' }}>
             <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#1976d2', mb: 2 }}>Kullanıcılar</Typography>
             {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-            <Table size="small" sx={{ background: 'white', borderRadius: 1, overflow: 'hidden' }}>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Email</TableCell>
-                  <TableCell>Şifre</TableCell>
-                  <TableCell>Rol</TableCell>
-                  <TableCell>Mağaza</TableCell>
-                  <TableCell>Oluşturma</TableCell>
-                  <TableCell align="right">İşlemler</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {users.map((u) => (
-                  <TableRow key={u.id} hover>
-                    <TableCell>{u.email}</TableCell>
-                    <TableCell>
-                      {visible[u.id] ? 'Güvenlik nedeniyle gösterilemiyor' : '••••••'}
-                      <Tooltip title={visible[u.id] ? 'Gizle' : 'Göster'}>
-                        <IconButton size="small" onClick={() => setVisible((prev) => ({ ...prev, [u.id]: !prev[u.id] }))} sx={{ ml: 1 }}>
-                          {visible[u.id] ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
-                        </IconButton>
-                      </Tooltip>
-                    </TableCell>
-                    <TableCell>{u.storeId ? 'user' : 'admin'}</TableCell>
-                    <TableCell>{u.storeName || '-'}</TableCell>
-                    <TableCell>{new Date(u.createdAt).toLocaleDateString('tr-TR')}</TableCell>
-                    <TableCell align="right">
-                      <Button size="small" sx={{ mr: 1 }} variant="outlined" startIcon={<Edit />} onClick={() => openEdit(u)}>Düzenle</Button>
-                      <Button size="small" color="warning" variant="outlined" startIcon={<LockReset />} onClick={() => resetPassword(u.id)}>Şifre Sıfırla</Button>
-                    </TableCell>
+            
+            <Box sx={{ overflowX: 'auto', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', borderRadius: 2 }}>
+              <Table size="small" sx={{ background: 'white', minWidth: 900 }}>
+                <TableHead>
+                  <TableRow sx={{ bgcolor: '#f8fafc' }}>
+                    <TableCell sx={{ fontWeight: 700, color: '#1976d2' }}>Email</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#1976d2' }}>Şifre</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#1976d2' }}>Rol</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#1976d2' }}>Mağaza</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#1976d2' }}>Oluşturma</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700, color: '#1976d2' }}>İşlemler</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHead>
+                <TableBody>
+                  {users.map((u) => (
+                    <TableRow key={u.id} hover sx={{ '&:hover': { bgcolor: '#f8fbff' } }}>
+                      <TableCell>{u.email}</TableCell>
+                      <TableCell>
+                        {visible[u.id] ? 'Güvenlik nedeniyle gösterilemiyor' : '••••••'}
+                        <Tooltip title={visible[u.id] ? 'Gizle' : 'Göster'}>
+                          <IconButton size="small" onClick={() => setVisible((prev) => ({ ...prev, [u.id]: !prev[u.id] }))} sx={{ ml: 1 }}>
+                            {visible[u.id] ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+                          </IconButton>
+                        </Tooltip>
+                      </TableCell>
+                      <TableCell>{u.storeId ? 'user' : 'admin'}</TableCell>
+                      <TableCell>{u.storeName || '-'}</TableCell>
+                      <TableCell>{new Date(u.createdAt).toLocaleDateString('tr-TR')}</TableCell>
+                      <TableCell align="right">
+                        <Button 
+                          size="small" 
+                          sx={{ 
+                            mr: 1,
+                            borderRadius: 2,
+                            transition: 'all 0.3s ease',
+                            '&:hover': {
+                              transform: 'scale(1.05)'
+                            }
+                          }} 
+                          variant="outlined" 
+                          startIcon={<Edit />} 
+                          onClick={() => openEdit(u)}
+                        >
+                          Düzenle
+                        </Button>
+                        <Button 
+                          size="small" 
+                          color="warning" 
+                          variant="outlined" 
+                          startIcon={<LockReset />} 
+                          onClick={() => resetPassword(u.id)}
+                          sx={{
+                            borderRadius: 2,
+                            transition: 'all 0.3s ease',
+                            '&:hover': {
+                              transform: 'scale(1.05)'
+                            }
+                          }}
+                        >
+                          Şifre Sıfırla
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Box>
           </Box>
           <Footer />
         </Box>

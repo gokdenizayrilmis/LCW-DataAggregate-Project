@@ -83,163 +83,143 @@ const Navbar: React.FC<NavbarProps> = ({ storeData, userData }) => {
 
   return (
     <Box sx={{ 
-      background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)', 
+      backgroundColor: '#1976d2',
       color: 'white', 
-      p: 3,
+      py: 1,
+      px: 2,
       display: 'flex',
       alignItems: 'center',
       gap: 2,
-      boxShadow: '0 2px 12px rgba(0,0,0,0.1)',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+      borderBottom: '2px solid #1565c0',
       position: 'sticky',
       top: 0,
-      zIndex: 1000
+      zIndex: 1100
     }}>
       {/* Logo */}
-      <img 
-        src={lcwLogo} 
-        alt="LC Waikiki" 
-        style={{ 
-          width: 120, 
-          height: 40, 
-          cursor: 'pointer' 
-        }} 
+      <Box 
         onClick={handleHomeClick}
-      />
+        sx={{
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          transition: 'transform 0.2s ease',
+          '&:hover': {
+            transform: 'scale(1.05)'
+          }
+        }}
+      >
+        <img 
+          src={lcwLogo} 
+          alt="LC Waikiki" 
+          style={{ 
+            width: 100, 
+            height: 32
+          }} 
+        />
+      </Box>
 
       {/* Page Title */}
       <Typography 
-        variant="h5" 
+        variant="body1" 
         sx={{ 
-          fontWeight: 700, 
+          fontWeight: 600, 
           flex: 1,
-          fontSize: { xs: '1.1rem', sm: '1.25rem', md: '1.5rem' }
+          fontSize: { xs: '0.9rem', sm: '1rem' },
+          display: { xs: 'none', md: 'block' }
         }}
       >
-        {getPageTitle()}
+        {storeData?.name || 'Mağaza Paneli'}
       </Typography>
+
+      {/* Store Info Badge - Mobile */}
+      {storeData && (
+        <Box sx={{ 
+          display: { xs: 'flex', md: 'none' },
+          flex: 1,
+          alignItems: 'center',
+          gap: 0.5,
+          backgroundColor: 'rgba(255,255,255,0.15)',
+          px: 1.5,
+          py: 0.5,
+          borderRadius: 1.5
+        }}>
+          <StoreIcon sx={{ fontSize: 16 }} />
+          <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.85rem' }}>
+            {storeData.name}
+          </Typography>
+        </Box>
+      )}
 
       {/* Navigation Buttons */}
       <Box sx={{ 
         display: 'flex', 
         gap: 1, 
-        alignItems: 'center',
-        flexWrap: 'wrap'
+        alignItems: 'center'
       }}>
+        {/* User Menu Button */}
         <Button
-          variant="outlined"
-          startIcon={<HomeIcon />}
-          onClick={handleHomeClick}
+          variant="contained"
+          endIcon={<KeyboardArrowDownIcon />}
+          onClick={handleMenuOpen}
           sx={{ 
-            color: 'white', 
-            borderColor: 'white',
+            backgroundColor: 'rgba(255,255,255,0.2)',
+            color: 'white',
+            backdropFilter: 'blur(10px)',
             '&:hover': { 
-              backgroundColor: 'rgba(255,255,255,0.1)',
-              borderColor: 'white'
+              backgroundColor: 'rgba(255,255,255,0.3)',
             },
-            fontSize: { xs: '0.75rem', sm: '0.875rem' },
-            px: { xs: 1, sm: 2 }
+            fontSize: { xs: '0.75rem', sm: '0.8rem' },
+            px: { xs: 1.5, sm: 2 },
+            py: 0.75,
+            borderRadius: 1.5,
+            textTransform: 'none',
+            fontWeight: 600,
+            boxShadow: 'none'
           }}
         >
-          Ana Sayfa
-        </Button>
-
-        <Button
-          variant="outlined"
-          startIcon={<DashboardIcon />}
-          onClick={handleDashboardClick}
-          sx={{ 
-            color: 'white', 
-            borderColor: 'white',
-            '&:hover': { 
-              backgroundColor: 'rgba(255,255,255,0.1)',
-              borderColor: 'white'
-            },
-            fontSize: { xs: '0.75rem', sm: '0.875rem' },
-            px: { xs: 1, sm: 2 }
-          }}
-        >
-          Dashboard
-        </Button>
-
-        {/* Store/User Dropdown */}
-        {storeData ? (
-          <Button
-            variant="outlined"
-            endIcon={<KeyboardArrowDownIcon />}
-            onClick={handleMenuOpen}
-            sx={{ 
-              color: 'white', 
-              borderColor: 'white',
-              '&:hover': { 
-                backgroundColor: 'rgba(255,255,255,0.1)',
-                borderColor: 'white'
-              },
-              fontSize: { xs: '0.75rem', sm: '0.875rem' },
-              px: { xs: 1, sm: 2 }
-            }}
-          >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <StoreIcon sx={{ fontSize: 16 }} />
-              <Box sx={{ 
-                display: { xs: 'none', sm: 'block' },
-                textAlign: 'left',
-                maxWidth: 120,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis'
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Avatar 
+              sx={{ 
+                width: 28, 
+                height: 28,
+                bgcolor: 'rgba(255,255,255,0.3)',
+                fontSize: '0.75rem',
+                fontWeight: 700
+              }}
+            >
+              {storeData?.name?.charAt(0) || userData?.name?.charAt(0) || 'U'}
+            </Avatar>
+            <Box sx={{ 
+              display: { xs: 'none', sm: 'block' },
+              textAlign: 'left'
+            }}>
+              <Typography variant="body2" sx={{ 
+                display: 'block', 
+                lineHeight: 1.2,
+                fontWeight: 600,
+                fontSize: '0.85rem'
               }}>
-                <Typography variant="caption" sx={{ display: 'block', lineHeight: 1 }}>
-                  {storeData.name}
-                </Typography>
+                {storeData?.name || userData?.name || 'Kullanıcı'}
+              </Typography>
+              {storeData && (
                 <Chip 
                   label={storeData.isActive ? 'Aktif' : 'Pasif'} 
                   size="small"
-                  color={storeData.isActive ? 'success' : 'default'}
                   sx={{ 
-                    height: 16, 
+                    height: 16,
+                    mt: 0.25,
                     fontSize: '0.6rem',
-                    '& .MuiChip-label': { px: 0.5 }
+                    fontWeight: 600,
+                    backgroundColor: storeData.isActive ? '#4caf50' : '#757575',
+                    color: 'white',
+                    '& .MuiChip-label': { px: 0.75 }
                   }}
                 />
-              </Box>
+              )}
             </Box>
-          </Button>
-        ) : (
-          <Button
-            variant="outlined"
-            endIcon={<KeyboardArrowDownIcon />}
-            onClick={handleMenuOpen}
-            sx={{ 
-              color: 'white', 
-              borderColor: 'white',
-              '&:hover': { 
-                backgroundColor: 'rgba(255,255,255,0.1)',
-                borderColor: 'white'
-              },
-              fontSize: { xs: '0.75rem', sm: '0.875rem' },
-              px: { xs: 1, sm: 2 }
-            }}
-          >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <PersonIcon sx={{ fontSize: 16 }} />
-              <Box sx={{ 
-                display: { xs: 'none', sm: 'block' },
-                textAlign: 'left'
-              }}>
-                <Typography variant="caption" sx={{ display: 'block', lineHeight: 1 }}>
-                  {userData?.name || 'Kullanıcı'}
-                </Typography>
-                <Typography variant="caption" sx={{ 
-                  display: 'block', 
-                  lineHeight: 1,
-                  opacity: 0.8,
-                  fontSize: '0.6rem'
-                }}>
-                  {userData?.role || 'admin'}
-                </Typography>
-              </Box>
-            </Box>
-          </Button>
-        )}
+          </Box>
+        </Button>
 
         {/* Dropdown Menu */}
         <Menu
@@ -248,27 +228,80 @@ const Navbar: React.FC<NavbarProps> = ({ storeData, userData }) => {
           onClose={handleMenuClose}
           PaperProps={{
             sx: {
-              mt: 1,
-              minWidth: 200,
+              mt: 1.5,
+              minWidth: 240,
+              borderRadius: 2,
+              boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
               '& .MuiMenuItem-root': {
                 py: 1.5,
-                px: 2
+                px: 2.5,
+                borderRadius: 1,
+                mx: 1,
+                my: 0.5,
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                  transform: 'translateX(4px)'
+                }
               }
             }
           }}
+          transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+          anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
         >
+          {/* User Info Header */}
+          {(storeData || userData) && (
+            <>
+              <Box sx={{ px: 2.5, py: 2, backgroundColor: '#f5f5f5' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <Avatar sx={{ 
+                    bgcolor: '#1976d2',
+                    width: 48,
+                    height: 48,
+                    fontSize: '1.25rem',
+                    fontWeight: 700
+                  }}>
+                    {storeData?.name?.charAt(0) || userData?.name?.charAt(0) || 'U'}
+                  </Avatar>
+                  <Box>
+                    <Typography variant="body1" sx={{ fontWeight: 700, color: '#333' }}>
+                      {storeData?.name || userData?.name || 'Kullanıcı'}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: '#666', fontSize: '0.85rem' }}>
+                      {userData?.email || storeData?.name}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Box>
+              <Divider sx={{ my: 1 }} />
+            </>
+          )}
+          
           <MenuItem onClick={handleSettingsClick}>
             <ListItemIcon>
-              <SettingsIcon fontSize="small" />
+              <SettingsIcon fontSize="small" sx={{ color: '#1976d2' }} />
             </ListItemIcon>
-            Ayarlar
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              Ayarlar
+            </Typography>
           </MenuItem>
-          <Divider />
-          <MenuItem onClick={handleLogout}>
+          
+          <Divider sx={{ my: 1 }} />
+          
+          <MenuItem 
+            onClick={handleLogout}
+            sx={{
+              '&:hover': {
+                backgroundColor: 'rgba(211, 47, 47, 0.08) !important',
+              }
+            }}
+          >
             <ListItemIcon>
-              <LogoutIcon fontSize="small" />
+              <LogoutIcon fontSize="small" sx={{ color: '#d32f2f' }} />
             </ListItemIcon>
-            Çıkış Yap
+            <Typography variant="body2" sx={{ fontWeight: 600, color: '#d32f2f' }}>
+              Çıkış Yap
+            </Typography>
           </MenuItem>
         </Menu>
       </Box>
