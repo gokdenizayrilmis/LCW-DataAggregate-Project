@@ -7,21 +7,27 @@ const Footer: React.FC = () => {
     <Box 
       component="footer" 
       sx={{
-        width: '100%',
-        backgroundColor: '#1e1e1e',
+        width: '100vw',
+        backgroundColor: '#1976d2',
         color: '#fff',
-        mt: 'auto'
+        mt: 'auto',
+        borderTop: '3px solid #1565c0',
+        position: 'relative',
+        left: 0,
+        right: 0,
+        marginLeft: 0,
+        zIndex: 1200,
       }}
     >
       <Container maxWidth="lg">
         <Box
           sx={{
-            py: 4,
+            py: 3,
             display: 'flex',
             flexDirection: { xs: 'column', md: 'row' },
             alignItems: 'center',
             justifyContent: 'space-between',
-            gap: 3
+            gap: 2
           }}
         >
           {/* Sol Kısım - LCW Branding */}

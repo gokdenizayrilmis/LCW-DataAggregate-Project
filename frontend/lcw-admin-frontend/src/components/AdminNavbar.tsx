@@ -84,16 +84,6 @@ const AdminNavbar: React.FC = () => {
 
         {/* Sağ Taraf İkonları */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {/* Dashboard Butonu */}
-          <Button 
-            color="inherit" 
-            startIcon={<Dashboard />}
-            onClick={() => navigate('/dashboard')}
-            sx={{ fontWeight: 600, display: { xs: 'none', sm: 'flex' } }}
-          >
-            Dashboard
-          </Button>
-
           {/* Bildirimler */}
           <Tooltip title="Bildirimler">
             <IconButton color="inherit" onClick={handleNotificationClick}>
