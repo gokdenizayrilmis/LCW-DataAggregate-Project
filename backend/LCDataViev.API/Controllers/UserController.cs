@@ -263,5 +263,54 @@ namespace LCDataViev.API.Controllers
             });
             return NoContent();
         }
+
+        // POST: api/User/{id}/reset-password
+        [HttpPost("{id}/reset-password")]
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> ResetPassword(int id)
+        {
+            var user = await _userRepository.GetByIdAsync(id);
+            if (user == null)
+                return NotFound();
+
+            // Güçlü geçici şifre üret
+            string GenerateTempPassword(int length = 12)
+            {
+                const string upper = "ABCDEFGHJKLMNPQRSTUVWXYZ"; // O/I çıkarıldı
+                const string lower = "abcdefghijkmnopqrstuvwxyz"; // l çıkarıldı
+                const string digits = "23456789"; // 0/1 çıkarıldı
+                const string symbols = "!@$%*?";
+                var all = upper + lower + digits + symbols;
+                var rng = new Random();
+                var chars = new char[length];
+                // En az birer karakter sınıfı
+                chars[0] = upper[rng.Next(upper.Length)];
+                chars[1] = lower[rng.Next(lower.Length)];
+                chars[2] = digits[rng.Next(digits.Length)];
+                chars[3] = symbols[rng.Next(symbols.Length)];
+                for (int i = 4; i < length; i++)
+                {
+                    chars[i] = all[rng.Next(all.Length)];
+                }
+                // Karıştır
+                return new string(chars.OrderBy(_ => rng.Next()).ToArray());
+            }
+
+            var tempPassword = GenerateTempPassword();
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(tempPassword);
+            user.UpdatedAt = DateTime.UtcNow;
+            await _userRepository.UpdateAsync(user);
+
+            await _notificationRepository.AddAsync(new Notification {
+                Message = $"Kullanıcı şifresi sıfırlandı: {user.Email}",
+                Type = "Info",
+                UserId = user.Id,
+                StoreId = user.StoreId,
+                CreatedAt = DateTime.UtcNow
+            });
+
+            // Geçici şifreyi sadece bu yanıtta döndür (log'lamıyoruz)
+            return Ok(new { temporaryPassword = tempPassword });
+        }
     }
 } 

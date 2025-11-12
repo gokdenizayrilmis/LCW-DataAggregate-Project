@@ -9,6 +9,8 @@ import {
   Box,
   Divider,
   Typography,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
 import {
   Dashboard,
@@ -18,14 +20,17 @@ import {
   CalendarMonth,
   Assessment,
   Settings,
+  ChevronLeft,
+  ChevronRight,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-const drawerWidth = 240;
+const drawerWidthExpanded = 240;
+const drawerWidthCollapsed = 72;
 
 const menuItems = [
   { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
-  { text: 'Toplam Mağaza', icon: <Store />, path: '/stores' },
+  { text: 'Mağazalar', icon: <Store />, path: '/stores' },
   { text: 'Mağaza Yönetimi', icon: <Settings />, path: '/store-management' },
   { text: 'Ürünler', icon: <Inventory />, path: '/products' },
   { text: 'Envanter', icon: <Assessment />, path: '/inventory' },
@@ -36,25 +41,42 @@ const menuItems = [
 const Sidebar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [collapsed, setCollapsed] = React.useState(false);
 
   return (
     <Drawer
       variant="permanent"
       sx={{
-        width: drawerWidth,
+        width: collapsed ? drawerWidthCollapsed : drawerWidthExpanded,
         flexShrink: 0,
         '& .MuiDrawer-paper': {
-          width: drawerWidth,
+          width: collapsed ? drawerWidthCollapsed : drawerWidthExpanded,
           boxSizing: 'border-box',
           backgroundColor: '#f8f9fa',
           borderRight: '1px solid #e0e0e0',
           top: '64px', // Navbar yüksekliği
           height: 'calc(100% - 64px)',
           zIndex: 1,
+          transition: 'width 0.25s ease',
         },
       }}
     >
-      <Box sx={{ overflow: 'auto', pt: 2 }}>
+      <Box sx={{ overflow: 'auto', pt: 1 }}>
+        {/* Collapse Toggle */}
+        <Box sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: collapsed ? 'center' : 'flex-end',
+          px: collapsed ? 0 : 1,
+          pb: 1,
+        }}>
+          <Tooltip title={collapsed ? 'Genişlet' : 'Daralt'}>
+            <IconButton size="small" onClick={() => setCollapsed((c) => !c)}>
+              {collapsed ? <ChevronRight /> : <ChevronLeft />}
+            </IconButton>
+          </Tooltip>
+        </Box>
+        <Divider sx={{ mb: 1 }} />
         <List>
           {menuItems.map((item, index) => (
             <ListItem key={item.text} disablePadding sx={{ mb: 0.5 }}>
@@ -64,6 +86,7 @@ const Sidebar: React.FC = () => {
                 sx={{
                   mx: 1,
                   borderRadius: 1,
+                  justifyContent: collapsed ? 'center' : 'flex-start',
                   '&.Mui-selected': {
                     backgroundColor: '#1976d2',
                     color: '#fff',
@@ -82,18 +105,25 @@ const Sidebar: React.FC = () => {
                 <ListItemIcon
                   sx={{
                     color: location.pathname === item.path ? '#fff' : '#1976d2',
-                    minWidth: 40,
+                    minWidth: collapsed ? 'auto' : 40,
+                    mr: collapsed ? 0 : 1,
+                    justifyContent: 'center',
                   }}
                 >
                   {item.icon}
                 </ListItemIcon>
-                <ListItemText
-                  primary={item.text}
-                  primaryTypographyProps={{
-                    fontSize: '0.95rem',
-                    fontWeight: location.pathname === item.path ? 600 : 400,
-                  }}
-                />
+                {!collapsed && (
+                  <ListItemText
+                    primary={item.text}
+                    primaryTypographyProps={{
+                      fontSize: '0.85rem',
+                      fontWeight: location.pathname === item.path ? 600 : 400,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  />
+                )}
               </ListItemButton>
             </ListItem>
           ))}
