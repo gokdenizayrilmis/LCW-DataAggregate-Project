@@ -94,12 +94,6 @@ Daha fazla detay için: [`docs/`](./docs/) klasörüne bakınız.
 
 ---
 
-## 🖼️ Ekran Görüntüleri
-
-> (Buraya projenin ana dashboard veya mağaza detay sayfası görselini ekleyebilirsiniz)
-
----
-
 ## 🤝 Katkıda Bulunma
 
 1. Fork yapın
