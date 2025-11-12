@@ -269,16 +269,6 @@ namespace LCDataViev.API.Controllers
         [Authorize(Roles = "user")]
         public async Task<IActionResult> UpdateWeeklySale(int id, UpdateWeeklySaleDto updateDto)
         {
-            // Token'daki store ile eşleşme
-            var storeIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "storeId")?.Value;
-            if (!int.TryParse(storeIdClaim, out var userStoreId) || userStoreId <= 0)
-            {
-                return Forbid();
-            }
-            if (existingWeeklySale.StoreId != userStoreId)
-            {
-                return Forbid();
-            }
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -288,6 +278,17 @@ namespace LCDataViev.API.Controllers
             if (existingWeeklySale == null)
             {
                 return NotFound();
+            }
+
+            // Token'daki store ile eşleşme
+            var storeIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "storeId")?.Value;
+            if (!int.TryParse(storeIdClaim, out var userStoreId) || userStoreId <= 0)
+            {
+                return Forbid();
+            }
+            if (existingWeeklySale.StoreId != userStoreId)
+            {
+                return Forbid();
             }
 
             // Validate that week number is unique for the store within the year (excluding current record)
